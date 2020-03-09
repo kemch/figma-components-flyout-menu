@@ -1,59 +1,42 @@
 <script>
-	import Menu from "./Menu.svelte";
+	
+	import Libraries from "./Libraries.svelte";
+	import { GlobalCSS } from 'figma-plugin-ds-svelte';
 
-	let components = [];
+	// let components = [];
 	let libs = [];
-	let data;
-	let documentName;
-	// msgs from main code
-	// onmessage = async (event) => {
-	// 	console.log(event)
-	// }
+
+	$: console.log(libs);
+
 	onmessage = async (event) => {
 
-		// if (event.data.pluginMessage)
-		// console.log(event.data.pluginMessage.components)
-
-		if (event.data.pluginMessage.libs) {
-			console.log('team')
-			libs = Object.keys(event.data.pluginMessage.libs);
-			console.log(libs)
-			for (let i = 0; i < Object.keys(event.data.pluginMessage.libs).length; i++) {
-				const element = Object.keys(event.data.pluginMessage.libs)[i];
-				libs.push(buildComponents(event.data.pluginMessage.libs[element]));
+		// LOCAL COMPONENTS
+		if (event.data.pluginMessage.components) {
+			// console.log('local')
+			let data = event.data.pluginMessage.components;
+			// no components
+			
+			if (data.length === 0) {
+				return
+			} else {
+				buildComponents(data, "Local Components");
 			}
 		}
-		
 
-		if (event.data.pluginMessage.components) {
-			console.log('local')
-			data = event.data.pluginMessage.components;
-			buildComponents(data);
+		// TEAM COMPONENTS FROM CLIENTSTORAGE
+		if (event.data.pluginMessage.libs) {
+			let data = event.data.pluginMessage.libs;
+			let keys = Object.keys(data);
+
+			for (let i = 0; i < keys.length; i++) {
+				// console.log(data[keys[i]])
+				// libs.push(libdata[libKeys[i]]);
+				// libName.push(libKeys[i]);
+				buildComponents(data[keys[i]], keys[i]);
+			}	
 		}
 		
-	// 	// if (event.data.pluginMessage.components.length) {
-	// 		// console.log(event.data.pluginMessage.components)
-	// 		data = event.data.pluginMessage.components;
-	// 		buildComponents(data);
-	// 		console.log(event)
-
-	// 		// console.log(event.data.pluginMessage.libraries)
-	// 		// const libs = Object.keys(data);
-	// 		// console.log(libs)
-
-	// 		// console.log(event.data.pluginMessage.libraries);
-	// 		// for (let i = 0; i < libs.length; i++) {
-	// 		// 	if  (libs[i] === "Local") {
-	// 		// 		buildComponents(data[libs[i]]);
-	// 		// 	}
-	// 		// }
-	// 		// console.log(Object.keys(data))
-	// 		// const reversed = data.reverse();
-	// 	// } 
-	// 	// if (event.data.pluginMessage.page.length) {
-	// 	// 	documentName = event.data.pluginMessage.page;
-	// 	// } 
-
+		// console.log("something happened!")
 	}
 	
 	 function splitPath(obj, ckeyPath, value, key) {
@@ -65,6 +48,10 @@
 			if (!(ckey in obj)) {
 				obj[ckey] = {};
 				obj[ckey].id = value;
+				// obj[ckey].id = value;
+				// console.log(obj[ckey])
+				// console.log(obj)
+
 				// console.log(key)
 				obj[ckey].key = key;
 			}
@@ -77,10 +64,10 @@
 	}
 
 	function discoverChildren(item) {
-            if (typeof item[1] === 'object') {
-                return item;
-            } 
-        }
+		if (typeof item[1] === 'object') {
+			return item;
+		} 
+	}
 	function transform(object) {
 		return Object
 			.entries(object)
@@ -99,28 +86,24 @@
 
 	
 
-	function buildComponents(data){
+	function buildComponents(data, key) {
 
 		let map = {};
 		for (let i = 0; i < data.length; i++) {
 			let split = data[i].name.split('/');
-			// console.log(data[i].key)
 			splitPath(map, split, data[i].id, data[i].key);
 		}
 
-		components = transform(map);
-		// console.log(components);
-		return components;
+		let components = transform(map);
+		components[0].source = key; // eh
+		console.log(components)
+		libs = [...libs, components];
 	}
 
 	function storeComponents() {
-		
-		// console.log(data)
-		// console.log(documentName)
 		parent.postMessage({pluginMessage: {
 			'type':'store'
 		}},'*');
-		// figma.clientStorage.setAsync('hello','world');
 	}
 	function loadComponents() {
 		parent.postMessage({pluginMessage: {
@@ -130,11 +113,6 @@
 	function removeComponents() {
 		parent.postMessage({pluginMessage: {
 			'type':'remove'
-		}}, '*');
-	}
-	function checkComponents() {
-		parent.postMessage({pluginMessage: {
-			'type':'check'
 		}}, '*');
 	}
 	function add() {
@@ -152,36 +130,29 @@
 			'type':'remove'
 		}}, '*');
 	}
+	function load() {
+		parent.postMessage({pluginMessage: {
+			'type':'load'
+		}}, '*');
+	}
 </script>
 
 
 <div id="root">
-<div class="footer">
-	<button on:click={add}>Add</button>
-	<button on:click={check}>Check</button>
-	<button on:click={remove}>Remove</button>
-</div>
-	<!-- <div class="footer">
-		<button on:click={storeComponents}>Store Components</button>
-		<button on:click={loadComponents}>Load Components</button>
-		<button on:click={removeComponents}>Remove Components</button>
-		<button on:click={checkComponents}>Check</button>
-	</div> -->
-	<div class="menu__wrap">
-		<Menu components={components} />
+	<div class="footer">
+		<button on:click={add}>Add</button>
+		<button on:click={check}>Check</button>
+		<button on:click={remove}>Remove</button>
 	</div>
-	{#each libs as lib} 
-		<Menu components={lib} />
-	{/each}
+	<div class="menu__wrap">
+		{#each libs as components, i}
+			<Libraries library={components} index={i} />
+		{/each}
+	</div>
 </div>
 
 <style>
 .footer {
-	/* position: fixed;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 50px; */
 	background: white;
 }
 .menu__wrap {

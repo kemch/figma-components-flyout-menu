@@ -37,6 +37,7 @@
 
 :global(.menu) {
     /* position: absolute; */
+    width: 120px;
 }
 
 :global(.menu .menu) {
@@ -46,6 +47,7 @@
     position: relative;
     margin-top: -1px;
     cursor: pointer;
+
 }
 
 :global(.menu__item) {
