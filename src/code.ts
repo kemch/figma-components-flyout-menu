@@ -1,41 +1,13 @@
 figma.showUI(__html__);
 
-let menu = [];
+// fetchStoredTeamLibraries()
 
-// Use findAll to traverse doocument for components.
-// And if the component is inside a frame, get that too.
-for (let index = 0; index < figma.root.children.length; index++) {
-	const page = figma.root.children[index];
+// const storageKey = "FOMTeamLibs";
 
-	const components = page.findAll(node => node.type === "COMPONENT");
+// let menu = [];
+// let libs = {};
+// let lib = "Local"
 
-	for (let index = 0; index < components.length; index++) {
-		const component = components[index];
-		// console.log(component.key)
-		let row: { key?: string, name?: string, id?: string } = {};
-		if (component.parent.type === "FRAME") {
-			let frame = component.parent.name;;
-			row.name = frame + '/' + component.name;
-		} else {
-			row.name = component.name;
-		}
-		row.id = component.id;
-		if (typeof component.key !== 'undefined') {
-			row.key = component.key;
-		}
-		menu.push(row);
-	}
-	menu.sort(compare);
-	// console.log(menu);
-	// send the menu object to the plugin UI.
-	// console.log(figma.importComponentByKeyAsync('da2cb21626ffa68780b5fdb76876e2b8461c4cda'));
-	
-	
-	
-	// console.log(foo)
-	// figma.currentPage.appendChild(foo);
-	figma.ui.postMessage({ 'components': menu, 'page': figma.root.name });
-}
 
 function compare(a, b) {
 	if (a.name < b.name) {
@@ -47,77 +19,244 @@ function compare(a, b) {
 	return 0;
 }
 
-function insertComponent(id:string) {
+function insertComponentById(id:string) {
 	
 	const instance = (figma.getNodeById(id) as any).createInstance();
-	// figma.currentPage.appendChild(instance);
-	instance.x = figma.viewport.center.x;
-	instance.y = figma.viewport.center.y;
+
+	instance.x = figma.viewport.center.x - (instance.width/2);
+	instance.y = figma.viewport.center.y - (instance.height/2);
+
+	// figma.selection
+	figma.currentPage.selection = [instance];
+
+	// figma.viewport.scrollAndZoomIntoView([instance]);
+	// figma.notify(`Inserted ${id}`)
 }
 
 function resize(size:object) {
-
-	// let size.width:number;
-	// figma.showUI(__html__, size);
 	figma.ui.resize(size.width, size.height);
 }
 
-const trythis = async (key) => {
-	try {
-		console.log(`3 ${key}`)
+const insertTeamComponent = async (key) => {
+	figma.notify('Fetching...')
+	try {		
 		const c = await figma.importComponentByKeyAsync(key);
-		// const c = await figma.importComponentByKeyAsync('da2cb21626ffa68780b5fdb76876e2b8461c4cda');
-		console.log(`4 ${c}`)
-		insertComponent(c.id);
+		insertComponentById(c.id);
 	} catch(e) {
-		console.log(e)
+		figma.notify(e)
 	}
-	// console.log(c)
-	// figma.currentPage.appendChild(c);
-	// try {
-	// 	const c = await figma.importComponentByKeyAsync('da2cb21626ffa68780b5fdb76876e2b8461c4cda');
-	// 	figma.currentPage.appendChild(c);
-	// 	console.log(c)
-	// 	// console.log(await figma.importComponentByKeyAsync('da2cb21626ffa68780b5fdb76876e2b8461c4cda'))
-	// } catch (e) {
-	// 	figma.notify(e)
-	// }
 }
-// trythis();
 
-figma.ui.onmessage =  msg => {
-	// console.log(msg);
+const Libs = {
+	storageKey :'Test11',
+	libs : {},
+	components : [],
+	isTeamLibrary : false,
 	
-	if (msg.type === 'create-component') {
-		// insertComponent(msg.component);
-		// console.log(msg.component)
-		trythis(msg.component)
+	getLocalComponents() {
+		// fetches all of the documents local components
+		// and stores them into this.components.
+		// this.fetchLibraryStore();
 
+		for (let index = 0; index < figma.root.children.length; index++) {
+			const page = figma.root.children[index];
+			const components = page.findAll(node => node.type === "COMPONENT");
+
+			for (let index = 0; index < components.length; index++) {
+				const component = components[index];
+				// console.log(component.key)
+				let row: { key?: string, name?: string, id?: string } = {};
+				if (component.parent.type === "FRAME") {
+					let frame = component.parent.name;;
+					row.name = frame + '/' + component.name;
+				} else {
+					row.name = component.name;
+				}
+				row.id = component.id;
+
+				// key is an empty string on team components
+				if (component.key !== '') {
+					row.key = component.key;
+					this.isTeamLibrary = true;
+				}
+				this.components.push(row);
+			}
+			this.components.sort(compare);
+		}
+		return this.components;
+	},
+	// fetchComponents(lib:String) {
+	// 	// params = lib?
+	// 	// Sends components to be rendered in the UI
+	// 	this.getLocalComponents(lib);
+
+	// 	figma.ui.postMessage({ 'components': this.components });
+	// },
+	buildLocalComponents() {
+		this.getLocalComponents();
+		// figma.ui.postMessage({ 'components': this.libs["Local"] })
+		figma.ui.postMessage({ 'components': this.components })
+		
+	},
+
+	sendStoredComponents() {
+		// figma.ui.postMessage({ 'libs': this.loadStoredTeamLibraries() })
+	},
+
+	async loadStoredTeamLibraries() {
+		const storage = await figma.clientStorage.getAsync(this.storageKey);
+
+		figma.ui.postMessage({'libs':storage});
+	},
+	
+	async addLib(lib:String) {
+		// must be a team lib
+		// lib = figma.root.name;
+		// console.log('hi')
+		// console.log(this.checkForTeamLibrary());
+		// await this.checkLibs()
+		await this.fetchLibraryStore();
+		// if (typeof this.libs === 'undefined') {
+		// 	figma.clientStorage.setAsync(this.storageKey, "hi");
+		// }
+		// console.log(this.components)
+		// console.log(typeof this.libs)
+		this.libs[lib] = this.components;
+		console.log(this.libs);
+		await figma.clientStorage.setAsync(this.storageKey, this.libs);
+		// console.log(this.libs)
+		// console.log(this.libs.lib1)	
+	},
+
+	// this could just be addLib since 
+	// only team libraries can be added
+	async storeTeamLibrary(lib) {
+		if (this.isTeamLibrary === true) {
+			console.log('This is a team library.')
+			this.addLib(lib);
+		} else {
+			figma.notify('This is not a team library.')
+		}
+	},
+	async initStorage() {
+		// places a key in a storage if it does not exist.
+	
+		const storage = await figma.clientStorage.getAsync(this.storageKey);
+		console.log(storage)
+		if (typeof storage === 'undefined') {
+			await figma.clientStorage.setAsync(this.storageKey, {});
+		}
+		console.log(storage)
+	},
+	async fetchLibraryStore() {
+		const storage = await figma.clientStorage.getAsync(this.storageKey);
+		this.libs = storage;
+	},
+	async checkLibs() {
+		const storage = await figma.clientStorage.getAsync(this.storageKey);
+		console.log(storage)
+		console.log(this.libs)
+		// console.log(typeof storage);
+		console.log(await figma.clientStorage.getAsync(this.storageKey))
+		return storage;
+		// console.log(this.libs)
+	},
+
+	// This needs to be refactored
+	// to remove a library by name
+	// probably from UI
+	async removeLib(lib:String) {
+		lib = figma.root.name;
+		await this.checkLibs()
+		delete this.libs[(lib as any)];
+		await figma.clientStorage.setAsync(this.storageKey, this.libs);
+	}
+}
+Libs.initStorage();
+
+Libs.buildLocalComponents();
+Libs.loadStoredTeamLibraries();
+// Libs.addLib("Local");
+// console.log(Libs.components)
+
+// console.log(Libs)
+
+figma.ui.onmessage = msg => {
+	if (msg.type === 'create-component') {
+		if (typeof msg.component.key === 'undefined') {
+			insertComponentById(msg.component.id);
+		} else {
+			insertTeamComponent(msg.component.key)
+		}
+	}
+	if (msg.type === 'add') {
+		console.log('clicked add')
+		Libs.storeTeamLibrary(figma.root.name);
+	}
+	if (msg.type === 'check') {
+		Libs.checkLibs();
+	}
+	if (msg.type === 'remove') {
+		Libs.removeLib(figma.root.name);
+	}
+	// if (msg.type === 'store') {
+	// 	let isTeamLibrary = false;
+	// 	for (let i = 0; i < menu.length; i++) {
+	// 		if (menu[i].key !== '') {
+	// 			isTeamLibrary = true;
+	// 		}
+	// 	}
+	// 	// console.log(isTeamLibrary)
+	// 	if (isTeamLibrary === true) {
+	// 		storeTeamLibrary();
+	// 	} else {
+	// 		figma.notify('This is not a team library.')
+	// 	}
+	// 	isTeamLibrary = false;
+	// }
+	if (msg.type === 'load') {
+		loadStoredTeamComponent()
 	}
 	if (msg.type === 'resize-ui') {
 		resize(msg.size);
 	}
-	if (msg.type === 'store') {
-		console.log(menu)
-		const things = [1,2,3,4]
-		figma.clientStorage.setAsync('hello', menu);
-		// asyncCall()
-	}
-	if (msg.type === 'load') {
-		console.log(asyncCall())
-		asyncCall()
-		
-	}
+	// if (msg.type === 'remove') {
+	// 	figma.clientStorage.setAsync(storageKey, '');
+	// 	figma.notify('Cleared')
+	// }
+	
 }
-
-async function asyncCall() {
-	// console.log('calling');
-	const result = await figma.clientStorage.getAsync('hello');
+// async function storeTeamLibrary() {
+// 	const result = await figma.clientStorage.getAsync(storageKey);
+// 	const document = figma.root.name;
+// 	libs[document] = result;
+// 	console.log(libs);
+// 	console.log(result);
+	
+// 	figma.clientStorage.setAsync(storageKey, libs[document]);
+// 	// figma.notify('Stored library')
+// }
+async function checkLocalStorage() {
+	const result = await figma.clientStorage.getAsync(storageKey);
 	console.log(result)
-	figma.ui.postMessage({ 'components': result, 'page': figma.root.name });
+}
+async function fetchStoredTeamLibraries() {
+	const result = await figma.clientStorage.getAsync(storageKey);
+	// console.log('stored:')
 	// console.log(result);
-	// return result;
-	// expected output: 'resolved'
+	if (result === '' || typeof result === 'undefined') {
+		figma.notify('There are no team libraries stored');
+	}
+	// else {
+	// 	libs = result;
+	// }
+}
+async function loadStoredTeamComponent() {
+	// fetchStoredTeamLibraries()
+	// console.log(libs);
+	// const result = await figma.clientStorage.getAsync(storageKey);
+	// figma.ui.postMessage({ 'components': result });
+	// console.log(result);
 }
 
 // // This plugin will open a modal to prompt the user to enter a number, and
@@ -159,7 +298,7 @@ async function asyncCall() {
 // 		}
 
 // 		figma.currentPage.selection = nodes;
-// 		figma.viewport.scrollAndZoomIntoView(nodes);
+// 		
 // 	}
 
 // 	// Make sure to close the plugin when you're done. Otherwise the plugin will

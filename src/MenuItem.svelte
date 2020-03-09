@@ -5,14 +5,18 @@
     export let subIndicator;
 
 
-    function addComponent(id) {
-        console.log(`1 ${id}`)
-        console.log(`2 ${key}`)
-        parent.postMessage({ pluginMessage: { type: 'create-component', component: key } }, '*');
+    function addComponent(id, key) {
+        // if (key === '') {
+            // console.log(id)
+            parent.postMessage({ pluginMessage: { type: 'create-component', component: id } }, '*');
+        // } else {
+        //     parent.postMessage({ pluginMessage: { type: 'create-component', component: key } }, '*');
+        // }
+        
     }
 
     function resize() {
-        // console.log('hi')
+        
         let width, height;
         setTimeout(function(){
             let height = document.getElementById('root').offsetHeight;
@@ -23,16 +27,24 @@
     }
 </script>
 
-<div class="menu__item__content" data-key={key} on:click={addComponent({id})}>{name} {#if subIndicator} <span class="menu__indicator"></span>{/if}</div>
+<div class="menu__item__content" data-key={key} on:click={addComponent({id, key})}>{name} {#if subIndicator} <span class="menu__indicator"></span>{/if}</div>
 
 <style>
 
 .menu__item__content {
+    /* background-color: #222222; */
+    padding: 4px;
+    font-size: 12px;
 
+    padding: 8px 16px;
+    white-space: nowrap;
+    min-width: 100px;
+    position: relative;
+    /* font-family: 'Inter', 'Roboto'; */
 }
-.menu__item__indicator {
+.menu__indicator {
     position: absolute;
-    top: 6px;
+    top: 12px;
     right: 5px;
     width: 0; 
     height: 0; 

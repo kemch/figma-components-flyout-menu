@@ -1,7 +1,6 @@
 <script>
     import MenuItem from './MenuItem.svelte';
     export let components;
-    console.log(components)
 </script>
 <ul class="menu">
     {#each components as component}
@@ -37,7 +36,7 @@
 }
 
 :global(.menu) {
-    position: absolute;
+    /* position: absolute; */
 }
 
 :global(.menu .menu) {
@@ -51,10 +50,11 @@
 
 :global(.menu__item) {
     font-size: 12px;
+    /* color: white; */
     background-color: white;
-    padding: 4px;
+    /* padding: 4px; */
     font-family: sans-serif;
-    border: 1px solid #ccc;
+    /* border: 1px solid #ccc; */
 }
 :global(.menu > .menu__item > .menu) {
     left: 100%;

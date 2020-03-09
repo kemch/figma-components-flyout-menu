@@ -2,21 +2,63 @@
 	import Menu from "./Menu.svelte";
 
 	let components = [];
+	let libs = [];
 	let data;
 	let documentName;
 	// msgs from main code
+	// onmessage = async (event) => {
+	// 	console.log(event)
+	// }
 	onmessage = async (event) => {
-		if (event.data.pluginMessage.components.length) {
-			data = event.data.pluginMessage.components;
-			// const reversed = data.reverse();
-			buildComponents(data);
-		} 
-		if (event.data.pluginMessage.page.length) {
-			documentName = event.data.pluginMessage.page;
-		} 
-	}
-	 function splitPath(obj, ckeyPath, value, key) {
+
+		// if (event.data.pluginMessage)
+		// console.log(event.data.pluginMessage.components)
+
+		if (event.data.pluginMessage.libs) {
+			console.log('team')
+			libs = Object.keys(event.data.pluginMessage.libs);
+			console.log(libs)
+			for (let i = 0; i < Object.keys(event.data.pluginMessage.libs).length; i++) {
+				const element = Object.keys(event.data.pluginMessage.libs)[i];
+				libs.push(buildComponents(event.data.pluginMessage.libs[element]));
+			}
+		}
 		
+
+		if (event.data.pluginMessage.components) {
+			console.log('local')
+			data = event.data.pluginMessage.components;
+			buildComponents(data);
+		}
+		
+	// 	// if (event.data.pluginMessage.components.length) {
+	// 		// console.log(event.data.pluginMessage.components)
+	// 		data = event.data.pluginMessage.components;
+	// 		buildComponents(data);
+	// 		console.log(event)
+
+	// 		// console.log(event.data.pluginMessage.libraries)
+	// 		// const libs = Object.keys(data);
+	// 		// console.log(libs)
+
+	// 		// console.log(event.data.pluginMessage.libraries);
+	// 		// for (let i = 0; i < libs.length; i++) {
+	// 		// 	if  (libs[i] === "Local") {
+	// 		// 		buildComponents(data[libs[i]]);
+	// 		// 	}
+	// 		// }
+	// 		// console.log(Object.keys(data))
+	// 		// const reversed = data.reverse();
+	// 	// } 
+	// 	// if (event.data.pluginMessage.page.length) {
+	// 	// 	documentName = event.data.pluginMessage.page;
+	// 	// } 
+
+	}
+	
+	 function splitPath(obj, ckeyPath, value, key) {
+		// console.log(key)
+		// console.log(value)
 		for (let i = 0; i < ckeyPath.length; i++) {
 			let ckey = ckeyPath[i].trim(); // name
 
@@ -46,12 +88,8 @@
 			.map(([name, component]) => {
 				if (component && typeof component === 'object') {
 					if (Object.keys(component).length > 1) {
-						// console.log(component);
 						return Object.assign({ name }, { key: component.key, id: component.id, components: transform(component) })
 					} else {
-						// console.log(object);
-						// console.log(component);
-						// console.log(component)
 						return Object.assign({ name }, { key: component.key, id: component.id })
 					}      
 				} 
@@ -66,7 +104,7 @@
 		let map = {};
 		for (let i = 0; i < data.length; i++) {
 			let split = data[i].name.split('/');
-			console.log(data[i].key)
+			// console.log(data[i].key)
 			splitPath(map, split, data[i].id, data[i].key);
 		}
 
@@ -89,24 +127,65 @@
 			'type':'load'
 		}}, '*');
 	}
+	function removeComponents() {
+		parent.postMessage({pluginMessage: {
+			'type':'remove'
+		}}, '*');
+	}
+	function checkComponents() {
+		parent.postMessage({pluginMessage: {
+			'type':'check'
+		}}, '*');
+	}
+	function add() {
+		parent.postMessage({pluginMessage: {
+			'type':'add'
+		}}, '*');
+	}
+	function check() {
+		parent.postMessage({pluginMessage: {
+			'type':'check'
+		}}, '*');
+	}
+	function remove() {
+		parent.postMessage({pluginMessage: {
+			'type':'remove'
+		}}, '*');
+	}
 </script>
 
 
 <div id="root">
-	<div class="footer">
+<div class="footer">
+	<button on:click={add}>Add</button>
+	<button on:click={check}>Check</button>
+	<button on:click={remove}>Remove</button>
+</div>
+	<!-- <div class="footer">
 		<button on:click={storeComponents}>Store Components</button>
 		<button on:click={loadComponents}>Load Components</button>
+		<button on:click={removeComponents}>Remove Components</button>
+		<button on:click={checkComponents}>Check</button>
+	</div> -->
+	<div class="menu__wrap">
+		<Menu components={components} />
 	</div>
-	<Menu components={components} />
+	{#each libs as lib} 
+		<Menu components={lib} />
+	{/each}
 </div>
 
 <style>
 .footer {
-	position: fixed;
-	bottom: 0;
+	/* position: fixed;
+	top: 0;
 	left: 0;
 	right: 0;
-	height: 50px;
+	height: 50px; */
 	background: white;
+}
+.menu__wrap {
+	position: relative;
+	top: 50px;
 }
 </style>
