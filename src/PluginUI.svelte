@@ -2,6 +2,7 @@
 	
 	import Libraries from "./Libraries.svelte";
 	import { GlobalCSS } from 'figma-plugin-ds-svelte';
+	import { Button, Input, SelectMenu } from 'figma-plugin-ds-svelte';
 
 	// let components = [];
 	let libs = [];
@@ -74,7 +75,7 @@
 			.filter(discoverChildren)
 			.map(([name, component]) => {
 				if (component && typeof component === 'object') {
-					if (Object.keys(component).length > 1) {
+					if (Object.keys(component).length > 2) {
 						return Object.assign({ name }, { key: component.key, id: component.id, components: transform(component) })
 					} else {
 						return Object.assign({ name }, { key: component.key, id: component.id })
@@ -135,6 +136,11 @@
 			'type':'load'
 		}}, '*');
 	}
+	function refresh() {
+		parent.postMessage({pluginMessage: {
+			'type': 'refresh'
+		}}, '*');
+	}
 </script>
 
 
@@ -143,6 +149,7 @@
 		<button on:click={add}>Add</button>
 		<button on:click={check}>Check</button>
 		<button on:click={remove}>Remove</button>
+		<button on:click={refresh}>Refresh</button>
 	</div>
 	<div class="menu__wrap">
 		{#each libs as components, i}
@@ -152,6 +159,10 @@
 </div>
 
 <style>
+:global(body) {
+	/* font-family: "Inter", sans-serif; */
+	font-size: 11px;
+}
 .footer {
 	background: white;
 }

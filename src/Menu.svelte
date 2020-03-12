@@ -51,11 +51,10 @@
 }
 
 :global(.menu__item) {
-    font-size: 12px;
+    /* font-size: 12px; */
     /* color: white; */
     background-color: white;
     /* padding: 4px; */
-    font-family: sans-serif;
     /* border: 1px solid #ccc; */
 }
 :global(.menu > .menu__item > .menu) {

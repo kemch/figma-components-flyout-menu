@@ -4,7 +4,7 @@ export let library;
 export let index;
 
 let key = library[0].source
-let expanded = true;
+let expanded = false;
 if (key === 'Local Components') {
     expanded = true;
 }
@@ -22,8 +22,10 @@ function toggle() {
 No local components
 {/if}
 <h3>{key}</h3>
+{#if key !== 'Local Components'}
 <button on:click={toggle}>Toggle</button>
 <button on:click={remove}>Remove</button>
+{/if}
 {#if expanded}
 <div class="menu__wrap">
     <Menu components={library} />
@@ -33,5 +35,12 @@ No local components
 <style>
 .menu__wrap {
     position: relative;
+}
+h3 {
+    font-size: 11px;
+    padding-left: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    
 }
 </style>
