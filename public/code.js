@@ -205,6 +205,10 @@ figma.ui.onmessage = msg => {
     if (msg.type === 'remove') {
         // console.log(msg.key)
         Libs.removeLib(msg.key);
+        figma.showUI(__html__, { width: 320, height: 600 });
+        Libs.initStorage();
+        Libs.buildLocalComponents();
+        Libs.loadStoredTeamLibraries();
     }
     if (msg.type === 'resize-ui') {
         resize(msg.size);

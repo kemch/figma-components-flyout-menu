@@ -1,5 +1,6 @@
 <script>
 import Menu from "./Menu.svelte";
+import {IconButton, Icon, IconName, IconCaretRight, IconCaretDown, IconTrash, IconBreak} from 'figma-plugin-ds-svelte';
 export let library;
 export let index;
 
@@ -21,11 +22,21 @@ function toggle() {
 {#if index === 0 && key !== 'Local Components'}
 No local components
 {/if}
-<h3>{key}</h3>
-{#if key !== 'Local Components'}
-<button on:click={toggle}>Toggle</button>
-<button on:click={remove}>Remove</button>
-{/if}
+<div on:click={toggle} class="header">
+    <div class="header__icon">
+        {#if expanded}
+            <Icon iconName={IconCaretDown}/>
+        {:else}
+            <Icon iconName={IconCaretRight}/>
+        {/if}
+    </div>
+    {key}
+    {#if key !== 'Local Components'}
+    <div class="header__right">
+        <IconButton on:click={remove} iconName={IconBreak}/>
+    </div>
+    {/if}
+</div>
 {#if expanded}
 <div class="menu__wrap">
     <Menu components={library} />
@@ -36,11 +47,28 @@ No local components
 .menu__wrap {
     position: relative;
 }
+.header {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin-top: -1px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    /* cursor: pointer; */
+}
+.header:hover {
+    background-color: #f0f0f0;
+}
+.header__right {
+    margin-left: auto;
+    padding-right: 16px;
+}
+.header__icon {
+    /* display: inline-block;    */
+    vertical-align: middle;
+    margin-right: -8px;
+}
 h3 {
     font-size: 11px;
-    padding-left: 10px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
     
 }
 </style>

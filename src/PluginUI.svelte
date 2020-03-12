@@ -2,7 +2,7 @@
 	
 	import Libraries from "./Libraries.svelte";
 	import { GlobalCSS } from 'figma-plugin-ds-svelte';
-	import { Button, Input, SelectMenu } from 'figma-plugin-ds-svelte';
+	import { Button, Input, SelectMenu, IconButton, IconCheck, IconName, Icon, IconPlus, IconLibrary, IconSwap } from 'figma-plugin-ds-svelte';
 
 	// let components = [];
 	let libs = [];
@@ -145,11 +145,15 @@
 
 
 <div id="root">
-	<div class="footer">
-		<button on:click={add}>Add</button>
-		<button on:click={check}>Check</button>
-		<button on:click={remove}>Remove</button>
-		<button on:click={refresh}>Refresh</button>
+	<div class="header">
+		<div class="header__left">
+			<div class="button"><IconButton title="Add current document library" iconName={IconPlus} on:click={add} /></div>
+		<div class="button"><IconButton iconName={IconCheck} on:click={check} /></div>
+		</div>
+		<div class="header__right">
+			<div class="button"><IconButton iconName={IconSwap} on:click={refresh} /></div>
+		</div>
+		
 	</div>
 	<div class="menu__wrap">
 		{#each libs as components, i}
@@ -163,11 +167,21 @@
 	/* font-family: "Inter", sans-serif; */
 	font-size: 11px;
 }
-.footer {
-	background: white;
-}
+
 .menu__wrap {
 	position: relative;
-	top: 50px;
+	/* top: 50px; */
+}
+.header {
+	display: flex;
+	align-items: middle;
+}
+.header__right {
+	margin-left: auto;
+}
+
+.header__left,
+.header__right {
+	display: flex;
 }
 </style>

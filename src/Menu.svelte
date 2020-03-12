@@ -1,8 +1,9 @@
 <script>
     import MenuItem from './MenuItem.svelte';
+    import {GlobalCSS} from 'figma-plugin-ds-svelte';
     export let components;
 </script>
-<ul class="menu">
+<ul class="menu ">
     {#each components as component}
         <li class="menu__item">
             {#if component.components}
@@ -38,6 +39,14 @@
 :global(.menu) {
     /* position: absolute; */
     width: 120px;
+    border:1px solid var(--hover-fill);
+
+    box-sizing: content-box;
+    /* box-shadow: var(--shadow-hud); */
+}
+
+:global(.menu:hover) {
+    
 }
 
 :global(.menu .menu) {
@@ -45,7 +54,7 @@
 }
 :global(.menu > .menu__item) {
     position: relative;
-    margin-top: -1px;
+    /* margin-top: -1px; */
     cursor: pointer;
 
 }
