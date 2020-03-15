@@ -1,20 +1,17 @@
 <script>
 
+    import Notification from './Notification.svelte';
+    import {Icon, IconSpinner} from 'figma-plugin-ds-svelte';
+
     export let name;
     export let id;
     export let key;
     export let subIndicator;
     let visible = false;
-
+    
 
     function addComponent(id, key) {
-        // if (key === '') {
-            // console.log(id)
-            parent.postMessage({ pluginMessage: { type: 'create-component', component: id } }, '*');
-        // } else {
-        //     parent.postMessage({ pluginMessage: { type: 'create-component', component: key } }, '*');
-        // }
-        
+        parent.postMessage({ pluginMessage: { type: 'create-component', component: id } }, '*');        
     }
 
     function tooltip() {
@@ -24,16 +21,7 @@
         }
     }
 
-    function resize() {
-        
-        let width, height;
-        setTimeout(function(){
-            let height = document.getElementById('root').offsetHeight;
-            let width = document.getElementById('root').offsetWidth;
-            console.log(height);
-            console.log(width);
-        },500);
-    }
+
    
 </script>
 
@@ -41,6 +29,8 @@
 <div class="tooltip">{name}</div>
 {/if}
 <div class="menu__item__content" data-key={key} on:mouseover={tooltip} on:mouseout={tooltip} on:click={addComponent({id, key})}>{name} {#if subIndicator} <span class="menu__indicator"></span>{/if}</div>
+
+
 
 <style>
 

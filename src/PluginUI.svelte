@@ -2,12 +2,15 @@
 	
 	import Libraries from "./Libraries.svelte";
 	import { GlobalCSS } from 'figma-plugin-ds-svelte';
-	import { Button, Input, SelectMenu, IconButton, IconCheck, IconName, Icon, IconPlus, IconLibrary, IconSwap } from 'figma-plugin-ds-svelte';
+	import { Button, Input, SelectMenu, IconButton, IconCheck, Icon, IconPlus, IconLibrary, IconSwap } from 'figma-plugin-ds-svelte';
+	import Notification from './Notification.svelte';
 
 	// let components = [];
 	let libs = [];
 
-	$: console.log(libs);
+	// $: console.log(libs);
+
+	$ : notification = 'hide';
 
 	onmessage = async (event) => {
 
@@ -35,6 +38,11 @@
 				// libName.push(libKeys[i]);
 				buildComponents(data[keys[i]], keys[i]);
 			}	
+		}
+
+		if (event.data.pluginMessage.notify) {
+			console.log(event.data.pluginMessage.notify)
+			notification = event.data.pluginMessage.notify;
 		}
 		
 		// console.log("something happened!")
@@ -143,7 +151,7 @@
 	}
 </script>
 
-
+<Notification visible={notification}/>
 <div id="root">
 	<div class="header">
 		<div class="header__left">

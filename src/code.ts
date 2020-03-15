@@ -20,14 +20,18 @@ function compare(a, b) {
 }
 
 function insertComponentById(id:string) {
+
 	
 	const instance = (figma.getNodeById(id) as any).createInstance();
+
+	figma.currentPage.selection = [instance];
 
 	instance.x = figma.viewport.center.x - (instance.width/2);
 	instance.y = figma.viewport.center.y - (instance.height/2);
 
 	// figma.selection
-	figma.currentPage.selection = [instance];
+
+	figma.ui.postMessage({notify:'hide'});
 
 	// figma.viewport.scrollAndZoomIntoView([instance]);
 	// figma.notify(`Inserted ${id}`)
@@ -38,12 +42,17 @@ function resize(size:object) {
 }
 
 const insertTeamComponent = async (key) => {
-	console.log('Fetching the component')
+
+	figma.ui.postMessage({ notify: 'show' });
+	
+	
 	try {		
+		
 		const c = await figma.importComponentByKeyAsync(key);
 		insertComponentById(c.id);
 	} catch(e) {
 		figma.notify(e)
+		figma.ui.postMessage({ notify: 'hide' });
 	}
 }
 

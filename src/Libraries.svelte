@@ -1,6 +1,6 @@
 <script>
 import Menu from "./Menu.svelte";
-import {IconButton, Icon, IconName, IconCaretRight, IconCaretDown, IconTrash, IconBreak} from 'figma-plugin-ds-svelte';
+import {IconButton, Icon, IconCaretRight, IconCaretDown, IconTrash, IconBreak} from 'figma-plugin-ds-svelte';
 export let library;
 export let index;
 
@@ -20,7 +20,9 @@ function toggle() {
 }
 </script>
 {#if index === 0 && key !== 'Local Components'}
-No local components
+<div class="local__empty">
+    No local components
+</div>
 {/if}
 <div on:click={toggle} class="header">
     <div class="header__icon">
@@ -70,5 +72,9 @@ No local components
 h3 {
     font-size: 11px;
     
+}
+.local__empty {
+    padding: 10px 20px;
+    color: var(--black3);
 }
 </style>

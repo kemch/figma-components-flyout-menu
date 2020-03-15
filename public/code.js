@@ -41,10 +41,11 @@ function compare(a, b) {
 }
 function insertComponentById(id) {
     const instance = figma.getNodeById(id).createInstance();
+    figma.currentPage.selection = [instance];
     instance.x = figma.viewport.center.x - (instance.width / 2);
     instance.y = figma.viewport.center.y - (instance.height / 2);
     // figma.selection
-    figma.currentPage.selection = [instance];
+    figma.ui.postMessage({ notify: 'hide' });
     // figma.viewport.scrollAndZoomIntoView([instance]);
     // figma.notify(`Inserted ${id}`)
 }
@@ -52,13 +53,14 @@ function resize(size) {
     figma.ui.resize(size.width, size.height);
 }
 const insertTeamComponent = (key) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Fetching the component');
+    figma.ui.postMessage({ notify: 'show' });
     try {
         const c = yield figma.importComponentByKeyAsync(key);
         insertComponentById(c.id);
     }
     catch (e) {
         figma.notify(e);
+        figma.ui.postMessage({ notify: 'hide' });
     }
 });
 const Libs = {
