@@ -1,13 +1,4 @@
-figma.showUI(__html__, { width: 320, height: 600 });
-
-// fetchStoredTeamLibraries()
-
-// const storageKey = "FOMTeamLibs";
-
-// let menu = [];
-// let libs = {};
-// let lib = "Local"
-
+figma.showUI(__html__, { width: 360, height: 400 });
 
 function compare(a, b) {
 	if (a.name < b.name) {
@@ -23,18 +14,42 @@ function insertComponentById(id:string) {
 
 	
 	const instance = (figma.getNodeById(id) as any).createInstance();
+	const frames = figma.currentPage.children
 
+	if (frames.length === 0) {
+		console.log('no frames on this page')
+	}
+
+	const centerX = figma.viewport.center.x;
+	const centerY = figma.viewport.center.y;
+
+	console.log(`viewport x: ${figma.viewport.center.x}`)
+	
+	
+	
 	figma.currentPage.selection = [instance];
-
+	
 	instance.x = figma.viewport.center.x - (instance.width/2);
 	instance.y = figma.viewport.center.y - (instance.height/2);
 
-	// figma.selection
+	figma.ui.postMessage({ notify: 'hide' });
 
-	figma.ui.postMessage({notify:'hide'});
+	for (let i = 0; i < frames.length; i++) {
+		if (frames[i].type === "FRAME") {
+			const frame = frames[i] as FrameNode;
+			if (instance.x  > frame.x && instance.x  < frame.x + frame.width &&
+				instance.y > frame.y && instance.y < frame.y + frame.height) {
+				frame.appendChild(instance);
+				instance.x = figma.viewport.center.x - frame.x - (instance.width / 2);
+				instance.y = figma.viewport.center.y - frame.y - (instance.height / 2);
+				return		
+			}
+		}		
+	}
 
-	// figma.viewport.scrollAndZoomIntoView([instance]);
-	// figma.notify(`Inserted ${id}`)
+	
+
+
 }
 
 function resize(size:object) {

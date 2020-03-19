@@ -15,7 +15,6 @@
     }
 
     function tooltip() {
-        console.log(name.length)
         if (name.length > 12) {
             visible = !visible;
         }

@@ -39,7 +39,7 @@
 :global(.menu) {
     /* position: absolute; */
     width: 120px;
-    border:1px solid var(--hover-fill);
+    border:1px solid var(--silver);
 
     box-sizing: content-box;
     /* box-shadow: var(--shadow-hud); */
