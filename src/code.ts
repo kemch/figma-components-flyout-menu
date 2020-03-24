@@ -46,13 +46,9 @@ function insertComponentById(id:string) {
 			}
 		}		
 	}
-
-	
-
-
 }
 
-function resize(size:object) {
+function resize(size) {
 	figma.ui.resize(size.width, size.height);
 }
 
@@ -211,17 +207,17 @@ figma.ui.onmessage = msg => {
 	if (msg.type === 'remove') {
 		// console.log(msg.key)
 		Libs.removeLib(msg.key);
-		figma.showUI(__html__, { width: 320, height: 600 });
+		figma.showUI(__html__, { width: 360, height: 400 });
 		Libs.initStorage();
 		Libs.buildLocalComponents();
 		Libs.loadStoredTeamLibraries();
 		
 	}
-	if (msg.type === 'resize-ui') {
+	if (msg.type === 'resize') {
 		resize(msg.size);
 	}
 	if (msg.type === 'refresh') {
-		figma.showUI(__html__, { width: 320, height: 600 });
+		figma.showUI(__html__, { width: 360, height: 400 });
 		Libs.initStorage();
 		Libs.buildLocalComponents();
 		Libs.loadStoredTeamLibraries();

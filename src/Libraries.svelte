@@ -12,6 +12,25 @@ if (key === 'Local Components') {
 
 function toggle() {
     expanded = !expanded;
+
+    // const root = document.getElementById('root');
+    setTimeout(() => {
+        const rect = document.getElementById('root').getClientRects();
+        const size = {width: rect[0].width, height: rect[0].height}
+        if (size.height < 400) {
+            size.height = 400;
+        }
+
+        if (size.height > 800) {
+            size.height = 800;
+        }
+    
+        console.log(rect)
+        parent.postMessage({pluginMessage: {
+            'type':'resize',
+            'size': size
+        }},'*');
+    }, 10);
 }
  function remove() {
     parent.postMessage({pluginMessage: {
