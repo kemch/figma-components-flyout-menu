@@ -178,12 +178,7 @@
 	function move(event) {
 		if (dragging === true) {
 
-			if (event.clientX < posX - inc) {
-				posX = event.clientX;
-			} else if (event.clientX >= posX - inc) {
-				posX = event.clientX + inc;
-			}
-			// posX = event.clientX + inc;
+			posX = event.clientX + inc;
 			posY = event.clientY + inc;
 
 			const size = {width: posX, height: posY}
