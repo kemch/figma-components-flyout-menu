@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 360, height: 400 });
+figma.showUI(__html__, { width: 340, height: 400 });
 
 function compare(a, b) {
 	if (a.name < b.name) {
@@ -57,8 +57,7 @@ const insertTeamComponent = async (key) => {
 	figma.ui.postMessage({ notify: 'show' });
 	
 	
-	try {		
-		
+	try {
 		const c = await figma.importComponentByKeyAsync(key);
 		insertComponentById(c.id);
 	} catch(e) {
@@ -76,6 +75,7 @@ const Libs = {
 	getLocalComponents() {
 		// fetches all of the documents local components
 		// and stores them into this.components.
+		this.components = [];
 		for (let index = 0; index < figma.root.children.length; index++) {
 			const page = figma.root.children[index];
 			const components = page.findAll(node => node.type === "COMPONENT");
@@ -101,6 +101,12 @@ const Libs = {
 			}
 			this.components.sort(compare);
 		}
+		if (this.isTeamLibrary) {
+			figma.ui.postMessage({ 'info': 'hi this is a team library' })
+			// check for updates / mismatches
+			console.log(this.components)
+			Libs.checkLibForUpdate(this.components);
+		}
 		return this.components;
 	},
 	
@@ -117,7 +123,7 @@ const Libs = {
 
 	async loadStoredTeamLibraries() {
 		const storage = await figma.clientStorage.getAsync(this.storageKey);
-
+		console.log(storage)
 		figma.ui.postMessage({'libs':storage});
 	},
 	
@@ -170,6 +176,27 @@ const Libs = {
 		// console.log(this.libs)
 	},
 
+	async checkLibForUpdate(localComponents) {
+		// console.log(localComponents)
+		const storage = await figma.clientStorage.getAsync(this.storageKey);
+		console.log(storage[figma.root.name]);
+		// console.log(storage);
+
+		if (storage[figma.root.name].length !== localComponents.length) {
+			figma.ui.postMessage({ 'info': 'hi there may be updates available in this library!' })
+		}
+		
+		
+		// storage[figma.root.name].map(c => {
+		// 	console.log(c.key)
+		// })
+		// console.log('hi')
+		// storage.map(function(c){
+		// 	console.log(c.key)
+		// })
+		
+	},
+
 	// This needs to be refactored
 	// to remove a library by name
 	// probably from UI
@@ -207,7 +234,7 @@ figma.ui.onmessage = msg => {
 	if (msg.type === 'remove') {
 		// console.log(msg.key)
 		Libs.removeLib(msg.key);
-		figma.showUI(__html__, { width: 360, height: 400 });
+		figma.showUI(__html__, { width: 340, height: 400 });
 		Libs.initStorage();
 		Libs.buildLocalComponents();
 		Libs.loadStoredTeamLibraries();
@@ -217,7 +244,7 @@ figma.ui.onmessage = msg => {
 		resize(msg.size);
 	}
 	if (msg.type === 'refresh') {
-		figma.showUI(__html__, { width: 360, height: 400 });
+		figma.showUI(__html__, { width: 340, height: 400 });
 		Libs.initStorage();
 		Libs.buildLocalComponents();
 		Libs.loadStoredTeamLibraries();

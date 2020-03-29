@@ -12,6 +12,8 @@
 
 	$ : notification = 'hide';
 
+	$: info = '';
+
 	onmessage = async (event) => {
 
 		// LOCAL COMPONENTS
@@ -33,24 +35,19 @@
 			let keys = Object.keys(data);
 
 			for (let i = 0; i < keys.length; i++) {
-				// console.log(data[keys[i]])
-				// libs.push(libdata[libKeys[i]]);
-				// libName.push(libKeys[i]);
 				buildComponents(data[keys[i]], keys[i]);
 			}	
 		}
 
 		if (event.data.pluginMessage.notify) {
-			console.log(event.data.pluginMessage.notify)
 			notification = event.data.pluginMessage.notify;
 		}
-		
-		// console.log("something happened!")
+		if (event.data.pluginMessage.info) {
+			info = event.data.pluginMessage.info;
+		}
 	}
 	
-	 function splitPath(obj, ckeyPath, value, key) {
-		// console.log(key)
-		// console.log(value)
+	function splitPath(obj, ckeyPath, value, key) {
 		for (let i = 0; i < ckeyPath.length; i++) {
 			let ckey = ckeyPath[i].trim(); // name
 
@@ -105,7 +102,7 @@
 
 		let components = transform(map);
 		components[0].source = key; // eh
-		console.log(components)
+		// console.log(components)
 		libs = [...libs, components];
 	}
 
@@ -198,15 +195,16 @@
 		}
 	}
 </script>
+<Notification visible={notification}/>
 <div on:mousedown={drag} class="drag-handle"></div>
 {#if (screen)}
 <div class="screen" on:mouseup={drag} on:mousemove={move}></div>
 {/if}
-<Notification visible={notification}/>
 <div id="root" class={screen? 'lock':'unlock'}>
 	<div class="header">
 		<div class="header__left">
 			<div class="button"><IconButton title="Add current document library" iconName={IconPlus} on:click={add} /></div>
+			<div class="message">{info}</div>
 		<div class="button"><IconButton iconName={IconCheck} on:click={check} /></div>
 		</div>
 		<div class="header__right">
