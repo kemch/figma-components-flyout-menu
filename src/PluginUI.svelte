@@ -149,10 +149,66 @@
 			'type': 'refresh'
 		}}, '*');
 	}
-</script>
+ 
+	let dragging = false;
+	$: screen = dragging === true;
+	function drag(event) {
 
+		console.log(event);
+		dragging = !dragging;
+		if (dragging === true) {
+			
+		} else {
+			console.log('stop')
+		console.log(posX)
+		console.log(posY)
+		const size = {width: posX, height: posY}
+		parent.postMessage({pluginMessage: {
+			'type': 'resize',
+			'size': size
+		}}, '*');
+			
+		}
+	}
+
+	let posX = 360;
+	let posY = 400;
+	let inc = 20;
+
+	function move(event) {
+		if (dragging === true) {
+
+			if (event.clientX < posX - inc) {
+				posX = event.clientX;
+			} else if (event.clientX >= posX - inc) {
+				posX = event.clientX + inc;
+			}
+			// posX = event.clientX + inc;
+			posY = event.clientY + inc;
+
+			const size = {width: posX, height: posY}
+
+			if (posX < 240) {
+				posX = 240;
+			}
+
+			if (posY < 200) {
+				poxY = 200;
+			}
+
+			parent.postMessage({pluginMessage: {
+				'type': 'resize',
+				'size': size
+			}}, '*');
+		}
+	}
+</script>
+<div on:mousedown={drag} class="drag-handle"></div>
+{#if (screen)}
+<div class="screen" on:mouseup={drag} on:mousemove={move}></div>
+{/if}
 <Notification visible={notification}/>
-<div id="root">
+<div id="root" class={screen? 'lock':'unlock'}>
 	<div class="header">
 		<div class="header__left">
 			<div class="button"><IconButton title="Add current document library" iconName={IconPlus} on:click={add} /></div>
@@ -192,4 +248,52 @@
 .header__right {
 	display: flex;
 }
-</style>
+
+.drag-handle {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+
+	cursor: nwse-resize;
+	z-index: 9;
+
+	width: 40px;
+	height: 40px;
+
+
+
+
+}
+
+.drag-handle:after {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	content: " ";
+	width: 0; 
+    height: 0; 
+    border-left: 10px solid transparent;
+    border-top: 5px solid transparent;
+    border-right: 5px solid rgba(0, 0,0,0.4);
+    border-bottom: 10px solid rgba(0, 0,0,0.4);
+}
+.screen {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 10;
+	background-color: rgba(0,0,0, 0.1);
+}
+
+.lock {
+	overflow: hidden;
+	height: 100%;
+	width: 100%;
+	pointer-events: none;
+}
+.lock * {
+	pointer-events: none;
+}
+</style> 

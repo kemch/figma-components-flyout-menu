@@ -46,6 +46,7 @@
     text-overflow: ellipsis;
 
     overflow: hidden;
+    user-select: none;
 }
 
 .menu__item__content:hover .menu__item__content {

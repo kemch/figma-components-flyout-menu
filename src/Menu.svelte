@@ -42,6 +42,7 @@
     border:1px solid var(--silver);
 
     box-sizing: content-box;
+    margin-bottom: 20px;
     /* box-shadow: var(--shadow-hud); */
 }
 
@@ -51,6 +52,7 @@
 
 :global(.menu .menu) {
     position: absolute;
+    margin-top: -1px;
 }
 :global(.menu > .menu__item) {
     position: relative;

@@ -25,11 +25,13 @@ function toggle() {
             size.height = 800;
         }
     
-        console.log(rect)
-        parent.postMessage({pluginMessage: {
-            'type':'resize',
-            'size': size
-        }},'*');
+        // console.log(rect)
+        if (expanded) {
+            parent.postMessage({pluginMessage: {
+                'type':'resize',
+                'size': size
+            }},'*');
+        }
     }, 10);
 }
  function remove() {
@@ -74,7 +76,8 @@ function toggle() {
     font-weight: bold;
     display: flex;
     align-items: center;
-    /* cursor: pointer; */
+    user-select: none;
+    cursor: pointer;
 }
 .header:hover {
     background-color: #f0f0f0;
@@ -95,5 +98,6 @@ h3 {
 .local__empty {
     padding: 10px 20px;
     color: var(--black3);
+    user-select: none;
 }
 </style>
