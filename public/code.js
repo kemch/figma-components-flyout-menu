@@ -24,7 +24,8 @@ function __awaiter(thisArg, _arguments, P, generator) {
     });
 }
 
-figma.showUI(__html__, { width: 340, height: 400 });
+figma.showUI(__html__, { width: 300, height: 66 });
+figma.ui.postMessage({ loadState: 'INIT' });
 function compare(a, b) {
     if (a.name < b.name) {
         return -1;
@@ -109,9 +110,9 @@ const Libs = {
             this.components.sort(compare);
         }
         if (this.isTeamLibrary) {
-            figma.ui.postMessage({ 'info': 'hi this is a team library' });
+            // figma.ui.postMessage({ 'info': 'hi this is a team library' })
             // check for updates / mismatches
-            console.log(this.components);
+            // console.log(this.components)
             Libs.checkLibForUpdate(this.components);
         }
         return this.components;
@@ -191,20 +192,16 @@ const Libs = {
     },
     checkLibForUpdate(localComponents) {
         return __awaiter(this, void 0, void 0, function* () {
-            // console.log(localComponents)
+            console.log(localComponents);
             const storage = yield figma.clientStorage.getAsync(this.storageKey);
             console.log(storage[figma.root.name]);
-            // console.log(storage);
-            if (storage[figma.root.name].length !== localComponents.length) {
-                figma.ui.postMessage({ 'info': 'hi there may be updates available in this library!' });
+            console.log(typeof storage[figma.root.name]);
+            if (typeof storage[figma.root.name] === 'undefined') {
+                figma.ui.postMessage({ 'team': { type: 'add', message: `Add Team Library "${figma.root.name}"`, count: `${localComponents.length}` } });
             }
-            // storage[figma.root.name].map(c => {
-            // 	console.log(c.key)
-            // })
-            // console.log('hi')
-            // storage.map(function(c){
-            // 	console.log(c.key)
-            // })
+            if (storage[figma.root.name].length !== localComponents.length) {
+                figma.ui.postMessage({ 'team': { type: 'update', message: `Update Team Library "${figma.root.name}"`, count: `${storage[figma.root.name].length - localComponents.length}` } });
+            }
         });
     },
     // This needs to be refactored
@@ -219,13 +216,16 @@ const Libs = {
         });
     }
 };
-Libs.initStorage();
-Libs.buildLocalComponents();
-Libs.loadStoredTeamLibraries();
 // Libs.addLib("Local");
 // console.log(Libs.components)
 // console.log(Libs)
 figma.ui.onmessage = msg => {
+    if (msg.type === 'load') {
+        Libs.initStorage();
+        Libs.buildLocalComponents();
+        Libs.loadStoredTeamLibraries();
+        figma.ui.postMessage({ loadState: 'READY' });
+    }
     if (msg.type === 'create-component') {
         if (typeof msg.component.key === 'undefined') {
             insertComponentById(msg.component.id);
@@ -257,5 +257,6 @@ figma.ui.onmessage = msg => {
         Libs.initStorage();
         Libs.buildLocalComponents();
         Libs.loadStoredTeamLibraries();
+        figma.ui.postMessage({ loadState: 'READY' });
     }
 };

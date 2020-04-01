@@ -2,17 +2,24 @@
 	
 	import Libraries from "./Libraries.svelte";
 	import { GlobalCSS } from 'figma-plugin-ds-svelte';
-	import { Button, Input, SelectMenu, IconButton, IconCheck, Icon, IconPlus, IconLibrary, IconSwap } from 'figma-plugin-ds-svelte';
+	import { Button, Input, IconSpinner, SelectMenu, IconButton, IconCheck, Icon, IconPlus, IconLibrary, IconSwap } from 'figma-plugin-ds-svelte';
 	import Notification from './Notification.svelte';
-
+	import TeamComponentsEmpty from './TeamComponentsEmpty.svelte';
+	import LocalComponentsEmpty from './LocalComponentsEmpty.svelte';
 	// let components = [];
 	let libs = [];
+	let teamLibsCount = 0;
 
 	// $: console.log(libs);
 
 	$ : notification = 'hide';
 
 	$: info = '';
+
+	$: loadState = 'LOADING';
+
+	$: takingLong = false;
+
 
 	onmessage = async (event) => {
 
@@ -33,6 +40,7 @@
 		if (event.data.pluginMessage.libs) {
 			let data = event.data.pluginMessage.libs;
 			let keys = Object.keys(data);
+			teamLibsCount = keys.length;
 
 			for (let i = 0; i < keys.length; i++) {
 				buildComponents(data[keys[i]], keys[i]);
@@ -45,6 +53,28 @@
 		if (event.data.pluginMessage.info) {
 			info = event.data.pluginMessage.info;
 		}
+		if (event.data.pluginMessage.team) {
+			info = event.data.pluginMessage.team.message;
+		}
+		if (event.data.pluginMessage.loadState) {
+			const state = event.data.pluginMessage.loadState;
+			
+			if (state === 'INIT') {
+				// loadState = 'LOADING'
+				
+				setTimeout(() => {
+					
+					parent.postMessage({pluginMessage: {
+						'type':'refresh'
+					}}, '*');
+				}, 100);
+			}
+
+			if (state === 'READY') {
+				loadState = 'READY'
+			}
+
+		}		
 	}
 	
 	function splitPath(obj, ckeyPath, value, key) {
@@ -142,23 +172,22 @@
 		}}, '*');
 	}
 	function refresh() {
-		parent.postMessage({pluginMessage: {
-			'type': 'refresh'
-		}}, '*');
+		loadState = 'LOADING';
+		setTimeout(() => {
+			parent.postMessage({pluginMessage: {
+				'type': 'refresh'
+			}}, '*');
+		}, 100);
 	}
  
 	let dragging = false;
 	$: screen = dragging === true;
 	function drag(event) {
 
-		console.log(event);
 		dragging = !dragging;
 		if (dragging === true) {
 			
 		} else {
-			console.log('stop')
-		console.log(posX)
-		console.log(posY)
 		const size = {width: posX, height: posY}
 		parent.postMessage({pluginMessage: {
 			'type': 'resize',
@@ -194,30 +223,55 @@
 			}}, '*');
 		}
 	}
+	
+	
+	
+	
 </script>
-<Notification visible={notification}/>
-<div on:mousedown={drag} class="drag-handle"></div>
-{#if (screen)}
-<div class="screen" on:mouseup={drag} on:mousemove={move}></div>
+
+{#if (loadState === 'LOADING')}
+	<div class="loading">
+		<div class="icon"><Icon iconName={IconSpinner} spin /></div>Building components menu...
+	</div>
+	<div class="takingLong">
+		This may take a moment with larger documents.
+	</div>
+{:else if (loadState === 'READY')}
+	<Notification visible={notification}/>
+	<div on:mousedown={drag} class="drag-handle"></div>
+	{#if (screen)}
+	<div class="screen" on:mouseup={drag} on:mousemove={move}></div>
+	{/if}
+	<div id="root" class={screen? 'lock':'unlock'}>
+		{#if info.length}
+		<div class="message">
+			<Button  on:click={add} variant="tertiary">{info}</Button>
+		</div>
+		{/if}
+		<!-- <div class="header"> -->
+			<!-- <div class="header__left"> -->
+				<!-- <div class="button"><IconButton title="Add current document library" iconName={IconPlus} on:click={add} /></div> -->
+				
+			<!-- <div class="button"><IconButton iconName={IconCheck} on:click={check} /></div> -->
+			<!-- </div> -->
+			<!-- <div class="header__right">
+				
+			</div> -->
+			
+		<!-- </div> -->
+		<div class="menu__wrap">
+			{#if Object.keys(libs).length}
+			{#each libs as components, i}
+				<Libraries library={components} count={libs.length} teamLibsCount={teamLibsCount} index={i} />
+			{/each}
+			{:else}
+				<LocalComponentsEmpty />
+				<TeamComponentsEmpty />
+			{/if}
+		</div>
+	</div>
+
 {/if}
-<div id="root" class={screen? 'lock':'unlock'}>
-	<div class="header">
-		<div class="header__left">
-			<div class="button"><IconButton title="Add current document library" iconName={IconPlus} on:click={add} /></div>
-			<div class="message">{info}</div>
-		<div class="button"><IconButton iconName={IconCheck} on:click={check} /></div>
-		</div>
-		<div class="header__right">
-			<div class="button"><IconButton iconName={IconSwap} on:click={refresh} /></div>
-		</div>
-		
-	</div>
-	<div class="menu__wrap">
-		{#each libs as components, i}
-			<Libraries library={components} index={i} />
-		{/each}
-	</div>
-</div>
 
 <style>
 :global(body) {
@@ -288,5 +342,31 @@
 }
 .lock * {
 	pointer-events: none;
+}
+.loading {
+	display: flex;
+	align-items: center;
+	padding-left: 16px;
+	padding-top: 8px;
+}
+
+.takingLong {
+	opacity: 0;
+	animation-duration: 1ms;
+	animation-delay: 2000ms;
+	animation-fill-mode: forwards;
+  	animation-name: slidein;
+	  padding-left: 45px;
+}
+.message {
+	padding-left: 16px;
+}
+@keyframes slidein {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 </style> 
