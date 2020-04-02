@@ -11,5 +11,6 @@ import {IconLibrary, OnboardingTip, Icon, } from 'figma-plugin-ds-svelte';
 <style>
 .light  {
     color: var(--black3);
+    user-select: none;
 }
 </style>

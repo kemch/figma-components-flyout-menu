@@ -1,5 +1,6 @@
 <script>
 import Menu from "./Menu.svelte";
+import { createEventDispatcher } from 'svelte';
 import {Button, IconLibrary, IconButton, IconComponent, OnboardingTip, Icon, IconMinus, IconCaretRight, IconCaretDown, IconTrash, IconBreak} from 'figma-plugin-ds-svelte';
 import TeamComponentsEmpty from './TeamComponentsEmpty.svelte';
 import LocalComponentsEmpty from './LocalComponentsEmpty.svelte';
@@ -7,10 +8,14 @@ export let library;
 export let index;
 export let count;
 export let teamLibsCount;
+export let localComponentsCount;
 
+const dispatch = createEventDispatcher();
 
 let key = library[0].source
 let expanded = false;
+
+$ : removeButtonText = 'Remove';
 // if (key === 'Local Components') {
 //     expanded = true;
 // }
@@ -44,24 +49,31 @@ function confirm() {
     confirmVisible = !confirmVisible;
 }
  function remove() {
-    parent.postMessage({pluginMessage: {
-        'type':'remove', key:key
-    }}, '*');
+    removeButtonText = 'Removing Library...'
+    dispatch('remove', {
+        'key': key
+    });
 }
 function cancel() {
     confirmVisible = !confirmVisible;
 }
 </script>
-{#if index === 0 && key !== 'Local Components'}
+{#if localComponentsCount === 0 && index === 0}
     <LocalComponentsEmpty />
 {/if}
-{#if (index === 1 && count > 1 || count === 1 && key !=='Local Components')}
+
+{#if localComponentsCount === 1 && index === 1
+|| localComponentsCount === 0 && index === 0
+}
+
     <OnboardingTip iconName={IconLibrary}>
         <div class="light">
            Saved Team Libraries ({teamLibsCount})
         </div>
     </OnboardingTip>
 {/if}
+
+
 <div class="header">
     <div class="header__name" on:click={toggle}>
         <div class="header__icon">
@@ -95,7 +107,7 @@ function cancel() {
             Are you sure you want to remove this team library from the flyout menu plugin?
             <div class="confirm__actions">
                 <Button variant="secondary" on:click={cancel}>Cancel</Button>
-                <Button variant="primary" on:click={remove}>Remove</Button>
+                <Button variant="primary" on:click={remove}>{removeButtonText}</Button>
             </div>
         </div>
     </div>
@@ -162,6 +174,7 @@ h3 {
 }
 .light {
     color: var(--black3);
+    user-select: none;
 }
 :global(.confirm__actions button) {
     margin-left: 8px;

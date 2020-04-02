@@ -1,4 +1,4 @@
-figma.showUI(__html__, { width: 300, height: 66 });
+figma.showUI(__html__, { width: 300, height: 100 });
 
 figma.ui.postMessage({loadState: 'INIT'});
 
@@ -13,21 +13,12 @@ function compare(a, b) {
 }
 
 function insertComponentById(id:string) {
-
 	
 	const instance = (figma.getNodeById(id) as any).createInstance();
 	const frames = figma.currentPage.children
 
-	if (frames.length === 0) {
-		console.log('no frames on this page')
-	}
-
 	const centerX = figma.viewport.center.x;
 	const centerY = figma.viewport.center.y;
-
-	console.log(`viewport x: ${figma.viewport.center.x}`)
-	
-	
 	
 	figma.currentPage.selection = [instance];
 	
@@ -57,8 +48,7 @@ function resize(size) {
 const insertTeamComponent = async (key) => {
 
 	figma.ui.postMessage({ notify: 'show' });
-	
-	
+
 	try {
 		const c = await figma.importComponentByKeyAsync(key);
 		insertComponentById(c.id);
@@ -104,10 +94,7 @@ const Libs = {
 			this.components.sort(compare);
 		}
 		if (this.isTeamLibrary) {
-			
-			// figma.ui.postMessage({ 'info': 'hi this is a team library' })
-			// check for updates / mismatches
-			// console.log(this.components)
+			// check for updates
 			Libs.checkLibForUpdate(this.components);
 		}
 		return this.components;
@@ -115,13 +102,8 @@ const Libs = {
 	
 	buildLocalComponents() {
 		this.getLocalComponents();
-		// figma.ui.postMessage({ 'components': this.libs["Local"] })
 		figma.ui.postMessage({ 'components': this.components })
 		
-	},
-
-	sendStoredComponents() {
-		// figma.ui.postMessage({ 'libs': this.loadStoredTeamLibraries() })
 	},
 
 	async loadStoredTeamLibraries() {
@@ -131,22 +113,9 @@ const Libs = {
 	},
 	
 	async addLib(lib:String) {
-		// must be a team lib
-		// lib = figma.root.name;
-		// console.log('hi')
-		// console.log(this.checkForTeamLibrary());
-		// await this.checkLibs()
 		await this.fetchLibraryStore();
-		// if (typeof this.libs === 'undefined') {
-		// 	figma.clientStorage.setAsync(this.storageKey, "hi");
-		// }
-		// console.log(this.components)
-		// console.log(typeof this.libs)
 		this.libs[lib] = this.components;
-		// console.log(this.libs);
 		await figma.clientStorage.setAsync(this.storageKey, this.libs);
-		// console.log(this.libs)
-		// console.log(this.libs.lib1)	
 	},
 
 	// this could just be addLib since 
@@ -171,19 +140,11 @@ const Libs = {
 	},
 	async checkLibs() {
 		const storage = await figma.clientStorage.getAsync(this.storageKey);
-		console.log(storage)
-		// console.log(this.libs)
-		// console.log(typeof storage);
-		// console.log(await figma.clientStorage.getAsync(this.storageKey))
 		return storage;
-		// console.log(this.libs)
 	},
 
 	async checkLibForUpdate(localComponents) {
-		console.log(localComponents)
 		const storage = await figma.clientStorage.getAsync(this.storageKey);
-		console.log(storage[figma.root.name]);
-		console.log(typeof storage[figma.root.name]);
 
 		if (typeof storage[figma.root.name] === 'undefined'){
 			figma.ui.postMessage({ 'team': { type: 'add', message: `Add Team Library "${figma.root.name}"`, count: `${localComponents.length}` } })
@@ -191,25 +152,14 @@ const Libs = {
 		if (storage[figma.root.name].length !== localComponents.length) {
 			figma.ui.postMessage({ 'team': { type: 'update', message: `Update Team Library "${figma.root.name}"`, count: `${storage[figma.root.name].length - localComponents.length}` } })
 		}
-		
 	},
 
-	// This needs to be refactored
-	// to remove a library by name
-	// probably from UI
 	async removeLib(lib:String) {
-		// lib = figma.root.name;
 		await this.fetchLibraryStore();
 		delete this.libs[(lib as any)];
 		await figma.clientStorage.setAsync(this.storageKey, this.libs);
 	}
 }
-
-
-// Libs.addLib("Local");
-// console.log(Libs.components)
-
-// console.log(Libs)
 
 figma.ui.onmessage = msg => {
 	if (msg.type === 'load') {
@@ -233,20 +183,13 @@ figma.ui.onmessage = msg => {
 		Libs.checkLibs();
 	}
 	if (msg.type === 'remove') {
-		// console.log(msg.key)
 		Libs.removeLib(msg.key);
-		figma.showUI(__html__, { width: 340, height: 400 });
-		Libs.initStorage();
-		Libs.buildLocalComponents();
-		Libs.loadStoredTeamLibraries();
-		
-		
 	}
 	if (msg.type === 'resize') {
 		resize(msg.size);
 	}
 	if (msg.type === 'refresh') {
-		figma.showUI(__html__, { width: 340, height: 400 });
+		figma.showUI(__html__, { width: 300, height: 100 });
 		Libs.initStorage();
 		Libs.buildLocalComponents();
 		Libs.loadStoredTeamLibraries();

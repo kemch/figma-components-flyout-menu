@@ -6,11 +6,11 @@
 	import Notification from './Notification.svelte';
 	import TeamComponentsEmpty from './TeamComponentsEmpty.svelte';
 	import LocalComponentsEmpty from './LocalComponentsEmpty.svelte';
-	// let components = [];
+	import DragHandle from './DragHandle.svelte';
+
 	let libs = [];
 	let teamLibsCount = 0;
-
-	// $: console.log(libs);
+	let localComponentsCount = 0;
 
 	$ : notification = 'hide';
 
@@ -19,7 +19,6 @@
 	$: loadState = 'LOADING';
 
 	$: takingLong = false;
-
 
 	onmessage = async (event) => {
 
@@ -32,8 +31,10 @@
 			if (data.length === 0) {
 				return
 			} else {
+				localComponentsCount = 1;
 				buildComponents(data, "Local Components");
 			}
+			
 		}
 
 		// TEAM COMPONENTS FROM CLIENTSTORAGE
@@ -44,7 +45,8 @@
 
 			for (let i = 0; i < keys.length; i++) {
 				buildComponents(data[keys[i]], keys[i]);
-			}	
+			}
+			autoSize();
 		}
 
 		if (event.data.pluginMessage.notify) {
@@ -58,12 +60,10 @@
 		}
 		if (event.data.pluginMessage.loadState) {
 			const state = event.data.pluginMessage.loadState;
-			
+
 			if (state === 'INIT') {
-				// loadState = 'LOADING'
 				
 				setTimeout(() => {
-					
 					parent.postMessage({pluginMessage: {
 						'type':'refresh'
 					}}, '*');
@@ -72,11 +72,12 @@
 
 			if (state === 'READY') {
 				loadState = 'READY'
+				
 			}
 
 		}		
 	}
-	
+
 	function splitPath(obj, ckeyPath, value, key) {
 		for (let i = 0; i < ckeyPath.length; i++) {
 			let ckey = ckeyPath[i].trim(); // name
@@ -84,11 +85,6 @@
 			if (!(ckey in obj)) {
 				obj[ckey] = {};
 				obj[ckey].id = value;
-				// obj[ckey].id = value;
-				// console.log(obj[ckey])
-				// console.log(obj)
-
-				// console.log(key)
 				obj[ckey].key = key;
 			}
 			if (typeof obj.id === 'undefined') {
@@ -98,12 +94,20 @@
 			obj = obj[ckey];
 		}
 	}
-
+	function autoSize() {
+		const rect = document.getElementById('root').getClientRects()[0];
+		const size = {width: rect.width, height: rect.height+32}
+		parent.postMessage({pluginMessage: {
+			'type': 'resize',
+			'size': size
+		}}, '*');
+	}
 	function discoverChildren(item) {
 		if (typeof item[1] === 'object') {
 			return item;
 		} 
 	}
+
 	function transform(object) {
 		return Object
 			.entries(object)
@@ -120,19 +124,14 @@
 		);
 	}
 
-	
-
 	function buildComponents(data, key) {
-
 		let map = {};
 		for (let i = 0; i < data.length; i++) {
 			let split = data[i].name.split('/');
 			splitPath(map, split, data[i].id, data[i].key);
 		}
-
 		let components = transform(map);
 		components[0].source = key; // eh
-		// console.log(components)
 		libs = [...libs, components];
 	}
 
@@ -152,19 +151,30 @@
 		}}, '*');
 	}
 	function add() {
+		info = 'Adding library...'
 		parent.postMessage({pluginMessage: {
 			'type':'add'
 		}}, '*');
+		setTimeout(() => {
+			parent.postMessage({pluginMessage: {
+				'type': 'refresh'
+			}}, '*');
+		}, 100);
 	}
 	function check() {
 		parent.postMessage({pluginMessage: {
 			'type':'check'
 		}}, '*');
 	}
-	function remove() {
+	function remove(event) {
 		parent.postMessage({pluginMessage: {
-			'type':'remove'
-		}}, '*');
+        	'type':'remove', key: event.detail.key
+    	}}, '*');
+		setTimeout(() => {
+			parent.postMessage({pluginMessage: {
+				'type': 'refresh'
+			}}, '*');
+		}, 300);
 	}
 	function load() {
 		parent.postMessage({pluginMessage: {
@@ -180,53 +190,14 @@
 		}, 100);
 	}
  
-	let dragging = false;
-	$: screen = dragging === true;
+	$: dragging = false;
+
+
 	function drag(event) {
-
-		dragging = !dragging;
-		if (dragging === true) {
-			
-		} else {
-		const size = {width: posX, height: posY}
-		parent.postMessage({pluginMessage: {
-			'type': 'resize',
-			'size': size
-		}}, '*');
-			
-		}
+		dragging = event.detail.dragging
+		// console.log(event.detail.dragging)
 	}
 
-	let posX = 360;
-	let posY = 400;
-	let inc = 20;
-
-	function move(event) {
-		if (dragging === true) {
-
-			posX = event.clientX + inc;
-			posY = event.clientY + inc;
-
-			const size = {width: posX, height: posY}
-
-			if (posX < 240) {
-				posX = 240;
-			}
-
-			if (posY < 200) {
-				poxY = 200;
-			}
-
-			parent.postMessage({pluginMessage: {
-				'type': 'resize',
-				'size': size
-			}}, '*');
-		}
-	}
-	
-	
-	
-	
 </script>
 
 {#if (loadState === 'LOADING')}
@@ -238,36 +209,29 @@
 	</div>
 {:else if (loadState === 'READY')}
 	<Notification visible={notification}/>
-	<div on:mousedown={drag} class="drag-handle"></div>
-	{#if (screen)}
-	<div class="screen" on:mouseup={drag} on:mousemove={move}></div>
-	{/if}
-	<div id="root" class={screen? 'lock':'unlock'}>
+	<DragHandle dragging={false} on:drag={drag} />
+
+	<div id="root" class={dragging? 'lock':'unlock'}>
 		{#if info.length}
 		<div class="message">
 			<Button  on:click={add} variant="tertiary">{info}</Button>
 		</div>
 		{/if}
-		<!-- <div class="header"> -->
-			<!-- <div class="header__left"> -->
-				<!-- <div class="button"><IconButton title="Add current document library" iconName={IconPlus} on:click={add} /></div> -->
-				
-			<!-- <div class="button"><IconButton iconName={IconCheck} on:click={check} /></div> -->
-			<!-- </div> -->
-			<!-- <div class="header__right">
-				
-			</div> -->
-			
-		<!-- </div> -->
+
 		<div class="menu__wrap">
 			{#if Object.keys(libs).length}
 			{#each libs as components, i}
-				<Libraries library={components} count={libs.length} teamLibsCount={teamLibsCount} index={i} />
+				<Libraries on:remove={remove} localComponentsCount={localComponentsCount} library={components} count={libs.length} teamLibsCount={teamLibsCount} index={i} />
 			{/each}
 			{:else}
 				<LocalComponentsEmpty />
 				<TeamComponentsEmpty />
 			{/if}
+		</div>
+
+		<div class="footer">
+			<button class="footer__button">Help</button>
+			<button on:click={refresh} class="footer__button">Refresh</button>
 		</div>
 	</div>
 
@@ -296,44 +260,6 @@
 	display: flex;
 }
 
-.drag-handle {
-	position: fixed;
-	bottom: 0;
-	right: 0;
-
-	cursor: nwse-resize;
-	z-index: 9;
-
-	width: 40px;
-	height: 40px;
-
-
-
-
-}
-
-.drag-handle:after {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	content: " ";
-	width: 0; 
-    height: 0; 
-    border-left: 10px solid transparent;
-    border-top: 5px solid transparent;
-    border-right: 5px solid rgba(0, 0,0,0.4);
-    border-bottom: 10px solid rgba(0, 0,0,0.4);
-}
-.screen {
-	position: fixed;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	z-index: 10;
-	background-color: rgba(0,0,0, 0.1);
-}
-
 .lock {
 	overflow: hidden;
 	height: 100%;
@@ -360,6 +286,30 @@
 }
 .message {
 	padding-left: 16px;
+}
+
+#root {
+	padding-bottom: 32px;
+}
+.footer {
+	border-top: 1px solid var(--black1);
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 32px;
+	display: flex;
+	background-color: white;
+	padding-left: 16px;
+}
+
+.footer__button {
+	margin-right: 12px;	
+	border: 0;
+	background-color: none;
+	outline: 0;
+	cursor: pointer;
+	color: var(--black3);
 }
 @keyframes slidein {
 	from {

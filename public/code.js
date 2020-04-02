@@ -24,7 +24,7 @@ function __awaiter(thisArg, _arguments, P, generator) {
     });
 }
 
-figma.showUI(__html__, { width: 300, height: 66 });
+figma.showUI(__html__, { width: 300, height: 100 });
 figma.ui.postMessage({ loadState: 'INIT' });
 function compare(a, b) {
     if (a.name < b.name) {
@@ -38,12 +38,8 @@ function compare(a, b) {
 function insertComponentById(id) {
     const instance = figma.getNodeById(id).createInstance();
     const frames = figma.currentPage.children;
-    if (frames.length === 0) {
-        console.log('no frames on this page');
-    }
     const centerX = figma.viewport.center.x;
     const centerY = figma.viewport.center.y;
-    console.log(`viewport x: ${figma.viewport.center.x}`);
     figma.currentPage.selection = [instance];
     instance.x = figma.viewport.center.x - (instance.width / 2);
     instance.y = figma.viewport.center.y - (instance.height / 2);
@@ -110,20 +106,14 @@ const Libs = {
             this.components.sort(compare);
         }
         if (this.isTeamLibrary) {
-            // figma.ui.postMessage({ 'info': 'hi this is a team library' })
-            // check for updates / mismatches
-            // console.log(this.components)
+            // check for updates
             Libs.checkLibForUpdate(this.components);
         }
         return this.components;
     },
     buildLocalComponents() {
         this.getLocalComponents();
-        // figma.ui.postMessage({ 'components': this.libs["Local"] })
         figma.ui.postMessage({ 'components': this.components });
-    },
-    sendStoredComponents() {
-        // figma.ui.postMessage({ 'libs': this.loadStoredTeamLibraries() })
     },
     loadStoredTeamLibraries() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -134,22 +124,9 @@ const Libs = {
     },
     addLib(lib) {
         return __awaiter(this, void 0, void 0, function* () {
-            // must be a team lib
-            // lib = figma.root.name;
-            // console.log('hi')
-            // console.log(this.checkForTeamLibrary());
-            // await this.checkLibs()
             yield this.fetchLibraryStore();
-            // if (typeof this.libs === 'undefined') {
-            // 	figma.clientStorage.setAsync(this.storageKey, "hi");
-            // }
-            // console.log(this.components)
-            // console.log(typeof this.libs)
             this.libs[lib] = this.components;
-            // console.log(this.libs);
             yield figma.clientStorage.setAsync(this.storageKey, this.libs);
-            // console.log(this.libs)
-            // console.log(this.libs.lib1)	
         });
     },
     // this could just be addLib since 
@@ -182,20 +159,12 @@ const Libs = {
     checkLibs() {
         return __awaiter(this, void 0, void 0, function* () {
             const storage = yield figma.clientStorage.getAsync(this.storageKey);
-            console.log(storage);
-            // console.log(this.libs)
-            // console.log(typeof storage);
-            // console.log(await figma.clientStorage.getAsync(this.storageKey))
             return storage;
-            // console.log(this.libs)
         });
     },
     checkLibForUpdate(localComponents) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(localComponents);
             const storage = yield figma.clientStorage.getAsync(this.storageKey);
-            console.log(storage[figma.root.name]);
-            console.log(typeof storage[figma.root.name]);
             if (typeof storage[figma.root.name] === 'undefined') {
                 figma.ui.postMessage({ 'team': { type: 'add', message: `Add Team Library "${figma.root.name}"`, count: `${localComponents.length}` } });
             }
@@ -204,21 +173,14 @@ const Libs = {
             }
         });
     },
-    // This needs to be refactored
-    // to remove a library by name
-    // probably from UI
     removeLib(lib) {
         return __awaiter(this, void 0, void 0, function* () {
-            // lib = figma.root.name;
             yield this.fetchLibraryStore();
             delete this.libs[lib];
             yield figma.clientStorage.setAsync(this.storageKey, this.libs);
         });
     }
 };
-// Libs.addLib("Local");
-// console.log(Libs.components)
-// console.log(Libs)
 figma.ui.onmessage = msg => {
     if (msg.type === 'load') {
         Libs.initStorage();
@@ -242,18 +204,13 @@ figma.ui.onmessage = msg => {
         Libs.checkLibs();
     }
     if (msg.type === 'remove') {
-        // console.log(msg.key)
         Libs.removeLib(msg.key);
-        figma.showUI(__html__, { width: 340, height: 400 });
-        Libs.initStorage();
-        Libs.buildLocalComponents();
-        Libs.loadStoredTeamLibraries();
     }
     if (msg.type === 'resize') {
         resize(msg.size);
     }
     if (msg.type === 'refresh') {
-        figma.showUI(__html__, { width: 340, height: 400 });
+        figma.showUI(__html__, { width: 300, height: 100 });
         Libs.initStorage();
         Libs.buildLocalComponents();
         Libs.loadStoredTeamLibraries();
