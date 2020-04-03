@@ -46,7 +46,9 @@
 			for (let i = 0; i < keys.length; i++) {
 				buildComponents(data[keys[i]], keys[i]);
 			}
-			autoSize();
+			setTimeout(() => {
+				autoSize();
+			}, 100);
 		}
 
 		if (event.data.pluginMessage.notify) {
@@ -96,11 +98,12 @@
 	}
 	function autoSize() {
 		const rect = document.getElementById('root').getClientRects()[0];
-		const size = {width: rect.width, height: rect.height+32}
+		const size = {width: rect.width, height: rect.height}
 		parent.postMessage({pluginMessage: {
 			'type': 'resize',
 			'size': size
 		}}, '*');
+
 	}
 	function discoverChildren(item) {
 		if (typeof item[1] === 'object') {

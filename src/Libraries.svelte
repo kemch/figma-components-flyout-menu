@@ -23,25 +23,31 @@ $ : removeButtonText = 'Remove';
 function toggle() {
     expanded = !expanded;
 
+    
+
     // const root = document.getElementById('root');
     setTimeout(() => {
         const rect = document.getElementById('root').getClientRects();
         const size = {width: rect[0].width, height: rect[0].height}
-        if (size.height < 400) {
-            size.height = 400;
-        }
+        // if (size.height < 400) {
+        //     size.height = 400;
+        // }
 
-        if (size.height > 800) {
-            size.height = 800;
-        }
-    
+        // if (size.height > 800) {
+        //     size.height = 800;
+        // }
+        
+        size.auto = expanded;
         // console.log(rect)
-        if (expanded) {
-            parent.postMessage({pluginMessage: {
-                'type':'resize',
-                'size': size
-            }},'*');
-        }
+        setTimeout(() => {
+            // if (expanded) {
+                parent.postMessage({pluginMessage: {
+                    'type':'resize',
+                    'size': size
+                }},'*');
+            // }
+            
+        }, 10);
     }, 10);
 }
 let confirmVisible = false;

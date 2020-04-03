@@ -58,6 +58,12 @@ function insertComponentById(id) {
     }
 }
 function resize(size) {
+    console.log(figma.viewport.bounds.height);
+    console.log(figma.viewport.zoom);
+    if (size.auto) {
+        console.log('auto');
+        size.height = size.height > figma.viewport.bounds.height * figma.viewport.bounds.height ? figma.viewport.bounds.height * figma.viewport.bounds.height : size.height;
+    }
     figma.ui.resize(size.width, size.height);
 }
 const insertTeamComponent = (key) => __awaiter(void 0, void 0, void 0, function* () {

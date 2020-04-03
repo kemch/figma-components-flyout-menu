@@ -29,9 +29,9 @@ export let visible;
     display: flex;
     align-items: center;
     font-size: var(--font-size-small);
-    bottom: 5px;
-    right: 5px;
-    border-radius: 5px;
+    bottom: 36px;
+    right: 4px;
+    border-radius: 4px;
     background-color: black;
     color: white;
 }
