@@ -16,9 +16,12 @@ let key = library[0].source
 let expanded = false;
 
 $ : removeButtonText = 'Remove';
-// if (key === 'Local Components') {
-//     expanded = true;
-// }
+let scope = '';
+if (key === 'Local Components') {
+    scope = 'LOCAL'
+} else {
+    scope = 'TEAM'
+}
 
 function toggle() {
     expanded = !expanded;
@@ -101,7 +104,7 @@ function cancel() {
 </div>
 {#if expanded}
 <div class="menu__wrap">
-    <Menu components={library} />
+    <Menu components={library} scope={scope}/>
 </div>
 {/if}
 

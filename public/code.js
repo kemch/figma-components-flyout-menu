@@ -1,4 +1,5 @@
-"use strict";
+'use strict';
+
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
@@ -12,4 +13,216 @@ MERCHANTABLITY OR NON-INFRINGEMENT.
 
 See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
-***************************************************************************** */function __awaiter(e,t,i,o){return new(i||(i=Promise))((function(n,a){function s(e){try{m(o.next(e))}catch(e){a(e)}}function r(e){try{m(o.throw(e))}catch(e){a(e)}}function m(e){e.done?n(e.value):new i((function(t){t(e.value)})).then(s,r)}m((o=o.apply(e,t||[])).next())}))}function compare(e,t){return e.name<t.name?-1:e.name>t.name?1:0}function insertComponentById(e){const t=figma.getNodeById(e).createInstance(),i=figma.currentPage.children;figma.viewport.center.x,figma.viewport.center.y;figma.currentPage.selection=[t],t.x=figma.viewport.center.x-t.width/2,t.y=figma.viewport.center.y-t.height/2,figma.ui.postMessage({notify:"hide"});for(let e=0;e<i.length;e++)if("FRAME"===i[e].type){const o=i[e];if(t.x>o.x&&t.x<o.x+o.width&&t.y>o.y&&t.y<o.y+o.height)return o.appendChild(t),t.x=figma.viewport.center.x-o.x-t.width/2,void(t.y=figma.viewport.center.y-o.y-t.height/2)}}function resize(e){e.auto&&(e.height=e.height>figma.viewport.bounds.height*figma.viewport.bounds.height?figma.viewport.bounds.height*figma.viewport.bounds.height:e.height),figma.ui.resize(e.width,e.height)}figma.showUI(__html__,{width:300,height:100}),figma.ui.postMessage({loadState:"INIT"});const insertTeamComponent=(e,t)=>__awaiter(void 0,void 0,void 0,(function*(){figma.ui.postMessage({notify:"show"});try{insertComponentById((yield figma.importComponentByKeyAsync(e)).id)}catch(e){try{insertComponentById(t)}catch(e){figma.notify(e),figma.ui.postMessage({notify:"hide"})}}})),Libs={storageKey:"PLUGIN_ComponentsFlyoutMenu",libs:{},components:[],isTeamLibrary:!1,getLocalComponents(){this.components=[];for(let e=0;e<figma.root.children.length;e++){const t=figma.root.children[e].findAll(e=>"COMPONENT"===e.type),i=figma.root.name;for(let e=0;e<t.length;e++){const o=t[e];let n={};if("FRAME"===o.parent.type){let e=o.parent.name;n.name=e+"/"+o.name}else n.name=o.name;n.id=o.id,n.source=i,""!==o.key&&(n.key=o.key,this.isTeamLibrary=!0),this.components.push(n)}this.components.sort(compare)}return this.isTeamLibrary&&Libs.checkLibForUpdate(this.components),this.components},buildLocalComponents(){this.getLocalComponents(),figma.ui.postMessage({components:this.components})},loadStoredTeamLibraries(){return __awaiter(this,void 0,void 0,(function*(){const e=yield figma.clientStorage.getAsync(this.storageKey);figma.ui.postMessage({libs:e})}))},addLib(e){return __awaiter(this,void 0,void 0,(function*(){yield this.fetchLibraryStore(),this.libs[e]=this.components,yield figma.clientStorage.setAsync(this.storageKey,this.libs)}))},storeTeamLibrary(e){return __awaiter(this,void 0,void 0,(function*(){!0===this.isTeamLibrary?this.addLib(e):figma.notify("This is not a team library.")}))},initStorage(){return __awaiter(this,void 0,void 0,(function*(){void 0===(yield figma.clientStorage.getAsync(this.storageKey))&&(yield figma.clientStorage.setAsync(this.storageKey,{}))}))},fetchLibraryStore(){return __awaiter(this,void 0,void 0,(function*(){const e=yield figma.clientStorage.getAsync(this.storageKey);this.libs=e}))},checkLibs(){return __awaiter(this,void 0,void 0,(function*(){return yield figma.clientStorage.getAsync(this.storageKey)}))},checkLibForUpdate(e){return __awaiter(this,void 0,void 0,(function*(){const t=yield figma.clientStorage.getAsync(this.storageKey);void 0===t[figma.root.name]&&figma.ui.postMessage({team:{type:"add",message:`Add Team Library "${figma.root.name}"`,count:`${e.length}`}}),t[figma.root.name].length!==e.length&&figma.ui.postMessage({team:{type:"update",message:`Update Team Library "${figma.root.name}"`,count:`${t[figma.root.name].length-e.length}`}})}))},removeLib(e){return __awaiter(this,void 0,void 0,(function*(){yield this.fetchLibraryStore(),delete this.libs[e],yield figma.clientStorage.setAsync(this.storageKey,this.libs)}))}};figma.ui.onmessage=e=>{var t,i;"load"===e.type&&(Libs.initStorage(),Libs.buildLocalComponents(),Libs.loadStoredTeamLibraries(),figma.ui.postMessage({loadState:"READY"})),"create-component"===e.type&&(void 0===e.component.key?insertComponentById(e.component.id):(t=e.component.key,i=e.component.id,__awaiter(void 0,void 0,void 0,(function*(){figma.ui.postMessage({notify:"show"});try{insertComponentById((yield figma.importComponentByKeyAsync(t)).id)}catch(e){try{insertComponentById(i)}catch(e){figma.notify(e),figma.ui.postMessage({notify:"hide"})}}})))),"add"===e.type&&Libs.storeTeamLibrary(figma.root.name),"check"===e.type&&Libs.checkLibs(),"remove"===e.type&&Libs.removeLib(e.key),"resize"===e.type&&resize(e.size),"refresh"===e.type&&(figma.showUI(__html__,{width:300,height:100}),Libs.initStorage(),Libs.buildLocalComponents(),Libs.loadStoredTeamLibraries(),figma.ui.postMessage({loadState:"READY"}))};
+***************************************************************************** */
+
+function __awaiter(thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+
+figma.showUI(__html__, { width: 300, height: 100 });
+figma.ui.postMessage({ loadState: 'INIT' });
+function compare(a, b) {
+    if (a.name < b.name) {
+        return -1;
+    }
+    if (a.name > b.name) {
+        return 1;
+    }
+    return 0;
+}
+function insertComponentById(id) {
+    const instance = figma.getNodeById(id).createInstance();
+    const frames = figma.currentPage.children;
+    const centerX = figma.viewport.center.x;
+    const centerY = figma.viewport.center.y;
+    figma.currentPage.selection = [instance];
+    instance.x = figma.viewport.center.x - (instance.width / 2);
+    instance.y = figma.viewport.center.y - (instance.height / 2);
+    figma.ui.postMessage({ notify: 'hide' });
+    for (let i = 0; i < frames.length; i++) {
+        if (frames[i].type === "FRAME") {
+            const frame = frames[i];
+            if (instance.x > frame.x && instance.x < frame.x + frame.width &&
+                instance.y > frame.y && instance.y < frame.y + frame.height) {
+                frame.appendChild(instance);
+                instance.x = figma.viewport.center.x - frame.x - (instance.width / 2);
+                instance.y = figma.viewport.center.y - frame.y - (instance.height / 2);
+                return;
+            }
+        }
+    }
+}
+function resize(size) {
+    // console.log(figma.viewport.bounds.height);
+    // console.log(figma.viewport.zoom);
+    if (size.auto) {
+        // console.log('auto')
+        size.height = size.height > figma.viewport.bounds.height * figma.viewport.bounds.height ? figma.viewport.bounds.height * figma.viewport.bounds.height : size.height;
+    }
+    figma.ui.resize(size.width, size.height);
+}
+const insertTeamComponent = (key, id) => __awaiter(void 0, void 0, void 0, function* () {
+    figma.ui.postMessage({ notify: 'show' });
+    try {
+        const c = yield figma.importComponentByKeyAsync(key);
+        insertComponentById(c.id);
+    }
+    catch (e) {
+        figma.notify('Unable to import component. Make sure this team library is enabled in Assets > Team Library.');
+        figma.ui.postMessage({ notify: 'hide' });
+    }
+});
+const Libs = {
+    storageKey: 'PLUGIN_ComponentsFlyoutMenu',
+    libs: {},
+    components: [],
+    isTeamLibrary: false,
+    getLocalComponents() {
+        // fetches all of the documents local components
+        // and stores them into this.components.
+        this.components = [];
+        for (let index = 0; index < figma.root.children.length; index++) {
+            const page = figma.root.children[index];
+            const components = page.findAll(node => node.type === "COMPONENT");
+            const source = figma.root.name; // guess we'll just throw this on the component for later
+            for (let index = 0; index < components.length; index++) {
+                const component = components[index];
+                let row = {};
+                if (component.parent.type === "FRAME") {
+                    let frame = component.parent.name;
+                    row.name = frame + '/' + component.name;
+                }
+                else {
+                    row.name = component.name;
+                }
+                row.id = component.id;
+                row.source = source;
+                // key is an empty string on team components
+                if (component.key !== '') {
+                    row.key = component.key;
+                    this.isTeamLibrary = true;
+                }
+                this.components.push(row);
+            }
+            this.components.sort(compare);
+        }
+        if (this.isTeamLibrary) {
+            // check for updates
+            Libs.checkLibForUpdate(this.components);
+        }
+        return this.components;
+    },
+    buildLocalComponents() {
+        this.getLocalComponents();
+        figma.ui.postMessage({ 'components': this.components });
+    },
+    loadStoredTeamLibraries() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const storage = yield figma.clientStorage.getAsync(this.storageKey);
+            // console.log(storage)
+            figma.ui.postMessage({ 'libs': storage });
+        });
+    },
+    addLib(lib) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.fetchLibraryStore();
+            this.libs[lib] = this.components;
+            yield figma.clientStorage.setAsync(this.storageKey, this.libs);
+        });
+    },
+    // this could just be addLib since 
+    // only team libraries can be added
+    storeTeamLibrary(lib) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.isTeamLibrary === true) {
+                // console.log('This is a team library.')
+                this.addLib(lib);
+            }
+            else {
+                figma.notify('This is not a team library.');
+            }
+        });
+    },
+    initStorage() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const storage = yield figma.clientStorage.getAsync(this.storageKey);
+            if (typeof storage === 'undefined') {
+                yield figma.clientStorage.setAsync(this.storageKey, {});
+            }
+        });
+    },
+    fetchLibraryStore() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const storage = yield figma.clientStorage.getAsync(this.storageKey);
+            this.libs = storage;
+        });
+    },
+    checkLibs() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const storage = yield figma.clientStorage.getAsync(this.storageKey);
+            return storage;
+        });
+    },
+    checkLibForUpdate(localComponents) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const storage = yield figma.clientStorage.getAsync(this.storageKey);
+            if (typeof storage[figma.root.name] === 'undefined') {
+                figma.ui.postMessage({ 'team': { type: 'add', message: `Add Team Library "${figma.root.name}"`, count: `${localComponents.length}` } });
+            }
+            if (storage[figma.root.name].length !== localComponents.length) {
+                figma.ui.postMessage({ 'team': { type: 'update', message: `Update Team Library "${figma.root.name}"`, count: `${storage[figma.root.name].length - localComponents.length}` } });
+            }
+        });
+    },
+    removeLib(lib) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.fetchLibraryStore();
+            delete this.libs[lib];
+            yield figma.clientStorage.setAsync(this.storageKey, this.libs);
+        });
+    }
+};
+figma.ui.onmessage = msg => {
+    if (msg.type === 'load') {
+        Libs.initStorage();
+        Libs.buildLocalComponents();
+        Libs.loadStoredTeamLibraries();
+        figma.ui.postMessage({ loadState: 'READY' });
+    }
+    if (msg.type === 'create-component-team') {
+        if (typeof msg.component.key === 'undefined') {
+            insertComponentById(msg.component.id);
+        }
+        else {
+            insertTeamComponent(msg.component.key, msg.component.id);
+        }
+    }
+    if (msg.type === 'create-component-local') {
+        insertComponentById(msg.component.id);
+    }
+    if (msg.type === 'add') {
+        // console.log('clicked add')
+        Libs.storeTeamLibrary(figma.root.name);
+    }
+    if (msg.type === 'check') {
+        Libs.checkLibs();
+    }
+    if (msg.type === 'remove') {
+        Libs.removeLib(msg.key);
+    }
+    if (msg.type === 'resize') {
+        resize(msg.size);
+    }
+    if (msg.type === 'refresh') {
+        figma.showUI(__html__, { width: 300, height: 100 });
+        Libs.initStorage();
+        Libs.buildLocalComponents();
+        Libs.loadStoredTeamLibraries();
+        figma.ui.postMessage({ loadState: 'READY' });
+    }
+};

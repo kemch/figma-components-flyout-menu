@@ -60,13 +60,8 @@ const insertTeamComponent = async (key, id) => {
 		const c = await figma.importComponentByKeyAsync(key);
 		insertComponentById(c.id);
 	} catch(e) {
-		try {
-			insertComponentById(id);
-		}
-		catch(e) {
-			figma.notify(e)
-			figma.ui.postMessage({ notify: 'hide' });
-		}
+		figma.notify('Unable to import component. Make sure this team library is enabled in Assets > Team Library.')
+		figma.ui.postMessage({ notify: 'hide' });
 	}
 }
 
@@ -180,12 +175,16 @@ figma.ui.onmessage = msg => {
 		Libs.loadStoredTeamLibraries();
 		figma.ui.postMessage({ loadState: 'READY' });
 	}
-	if (msg.type === 'create-component') {
+	if (msg.type === 'create-component-team') {
 		if (typeof msg.component.key === 'undefined') {
 			insertComponentById(msg.component.id);
 		} else {
 			insertTeamComponent(msg.component.key, msg.component.id)
 		}
+	}
+
+	if (msg.type === 'create-component-local') {
+		insertComponentById(msg.component.id);
 	}
 	if (msg.type === 'add') {
 		// console.log('clicked add')

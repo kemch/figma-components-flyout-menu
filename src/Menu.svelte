@@ -2,15 +2,16 @@
     import MenuItem from './MenuItem.svelte';
     import {GlobalCSS} from 'figma-plugin-ds-svelte';
     export let components;
+    export let scope;
 </script>
 <ul class="menu ">
     {#each components as component}
         <li class="menu__item">
             {#if component.components}
-                <MenuItem {...component} subIndicator={true}/>
-                <svelte:self {...component}/>
+                <MenuItem scope={scope} {...component} subIndicator={true}/>
+                <svelte:self scope={scope} {...component} />
             {:else}
-                <MenuItem {...component} subIndicator={false}/>
+                <MenuItem scope={scope} {...component} subIndicator={false}/>
             {/if}
         </li>
     {/each}

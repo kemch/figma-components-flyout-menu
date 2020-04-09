@@ -7,11 +7,18 @@
     export let id;
     export let key;
     export let subIndicator;
+    export let scope;
+
     let visible = false;
     
 
     function addComponent(id, key) {
-        parent.postMessage({ pluginMessage: { type: 'create-component', component: id } }, '*');        
+        if (scope === 'LOCAL') {
+            parent.postMessage({ pluginMessage: { type: 'create-component-local', component: id } }, '*');        
+        } else if (scope ==='TEAM') {
+            parent.postMessage({ pluginMessage: { type: 'create-component-team', component: id } }, '*');        
+
+        }
     }
 
     function tooltip() {
