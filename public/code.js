@@ -58,27 +58,32 @@ function insertComponentById(id) {
     }
 }
 function resize(size) {
-    console.log(figma.viewport.bounds.height);
-    console.log(figma.viewport.zoom);
+    // console.log(figma.viewport.bounds.height);
+    // console.log(figma.viewport.zoom);
     if (size.auto) {
-        console.log('auto');
+        // console.log('auto')
         size.height = size.height > figma.viewport.bounds.height * figma.viewport.bounds.height ? figma.viewport.bounds.height * figma.viewport.bounds.height : size.height;
     }
     figma.ui.resize(size.width, size.height);
 }
-const insertTeamComponent = (key) => __awaiter(void 0, void 0, void 0, function* () {
+const insertTeamComponent = (key, id) => __awaiter(void 0, void 0, void 0, function* () {
     figma.ui.postMessage({ notify: 'show' });
     try {
         const c = yield figma.importComponentByKeyAsync(key);
         insertComponentById(c.id);
     }
     catch (e) {
-        figma.notify(e);
-        figma.ui.postMessage({ notify: 'hide' });
+        try {
+            insertComponentById(id);
+        }
+        catch (e) {
+            figma.notify(e);
+            figma.ui.postMessage({ notify: 'hide' });
+        }
     }
 });
 const Libs = {
-    storageKey: 'Test13',
+    storageKey: 'PLUGIN_ComponentsFlyoutMenu',
     libs: {},
     components: [],
     isTeamLibrary: false,
@@ -124,7 +129,7 @@ const Libs = {
     loadStoredTeamLibraries() {
         return __awaiter(this, void 0, void 0, function* () {
             const storage = yield figma.clientStorage.getAsync(this.storageKey);
-            console.log(storage);
+            // console.log(storage)
             figma.ui.postMessage({ 'libs': storage });
         });
     },
@@ -140,7 +145,7 @@ const Libs = {
     storeTeamLibrary(lib) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.isTeamLibrary === true) {
-                console.log('This is a team library.');
+                // console.log('This is a team library.')
                 this.addLib(lib);
             }
             else {
@@ -199,7 +204,7 @@ figma.ui.onmessage = msg => {
             insertComponentById(msg.component.id);
         }
         else {
-            insertTeamComponent(msg.component.key);
+            insertTeamComponent(msg.component.key, msg.component.id);
         }
     }
     if (msg.type === 'add') {

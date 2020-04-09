@@ -28,14 +28,16 @@ function toggle() {
     // const root = document.getElementById('root');
     setTimeout(() => {
         const rect = document.getElementById('root').getClientRects();
+        // console.log(rect)
+        // console.log(document.getElementById('root').getBoundingClientRect())
         const size = {width: rect[0].width, height: rect[0].height}
         // if (size.height < 400) {
         //     size.height = 400;
         // }
 
-        // if (size.height > 800) {
-        //     size.height = 800;
-        // }
+        if (size.height > 640) {
+            size.height = 640;
+        }
         
         size.auto = expanded;
         // console.log(rect)
@@ -131,6 +133,12 @@ function cancel() {
     align-items: center;
     user-select: none;
     cursor: pointer;
+
+    position: sticky;
+    top: 0;
+
+    background-color: white;
+    z-index: 1;
 }
 .header__name {
     display: flex;

@@ -8,6 +8,7 @@
 	import LocalComponentsEmpty from './LocalComponentsEmpty.svelte';
 	import DragHandle from './DragHandle.svelte';
 
+
 	let libs = [];
 	let teamLibsCount = 0;
 	let localComponentsCount = 0;
@@ -201,6 +202,20 @@
 		// console.log(event.detail.dragging)
 	}
 
+	$: showHelp = false;
+
+	function help() {
+		showHelp = !showHelp;
+			setTimeout(() => {
+			if (showHelp === true) {
+				const size = {width: 360, height: 480}
+				parent.postMessage({pluginMessage: {
+					'type': 'resize',
+					'size': size
+				}}, '*');
+			}
+		}, 10);
+	}
 </script>
 
 {#if (loadState === 'LOADING')}
@@ -233,10 +248,41 @@
 		</div>
 
 		<div class="footer">
-			<button class="footer__button">Help</button>
+			<!-- <button on:click={help} class="footer__button">Help</button> -->
 			<button on:click={refresh} class="footer__button">Refresh</button>
 		</div>
 	</div>
+
+	{#if showHelp}
+		<div class="help">
+			<button on:click={help}>Close</button>
+			Team Libraries
+Team libraries are supported with a small workaround.
+
+<strong>To add a team library:</strong>
+<ol>
+<li>Open the source library document and launch this plugin.</li>
+<li>Click "Add Team Library". The library should then appear in the "Saved Team Libraries" section.
+Note: This does not "copy" the team library, it stores a reference to it so all component connections maintain their connection.</li>
+</ol>
+
+<strong>To update a team library:</strong>
+<ol>
+<li>Open the source library document and launch this plugin.</li>
+<li>Click "Update Team Library".</li>
+</ol>
+
+<strong>To remove a team library:</strong>
+<ol>
+<li>Click the minus sign next to any saved team library to remove it. To re-add, follow the steps to add the library.</li>
+</ol>
+
+<strong>To use components from saved team libraries:</strong>
+<ol>
+<li>Assuming the team library has been added, enable the team library via Figma's assets panel as normal.</li>
+</ol>
+		</div>
+	{/if}
 
 {/if}
 
@@ -285,7 +331,8 @@
 	animation-delay: 2000ms;
 	animation-fill-mode: forwards;
   	animation-name: slidein;
-	  padding-left: 45px;
+	padding-left: 45px;
+	font-size: var(--size-xxsmall);
 }
 .message {
 	padding-left: 16px;
@@ -321,5 +368,16 @@
 	to {
 		opacity: 1;
 	}
+}
+
+.help {
+	padding: 32px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: white;
+	z-index: 10;
 }
 </style> 

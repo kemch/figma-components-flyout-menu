@@ -42,17 +42,17 @@ function insertComponentById(id:string) {
 }
 
 function resize(size) {
-	console.log(figma.viewport.bounds.height);
-	console.log(figma.viewport.zoom);
+	// console.log(figma.viewport.bounds.height);
+	// console.log(figma.viewport.zoom);
 
 	if (size.auto) {
-		console.log('auto')
+		// console.log('auto')
 		size.height = size.height > figma.viewport.bounds.height * figma.viewport.bounds.height ? figma.viewport.bounds.height * figma.viewport.bounds.height : size.height;
 	}
 	figma.ui.resize(size.width, size.height);
 }
 
-const insertTeamComponent = async (key) => {
+const insertTeamComponent = async (key, id) => {
 
 	figma.ui.postMessage({ notify: 'show' });
 
@@ -60,13 +60,18 @@ const insertTeamComponent = async (key) => {
 		const c = await figma.importComponentByKeyAsync(key);
 		insertComponentById(c.id);
 	} catch(e) {
-		figma.notify(e)
-		figma.ui.postMessage({ notify: 'hide' });
+		try {
+			insertComponentById(id);
+		}
+		catch(e) {
+			figma.notify(e)
+			figma.ui.postMessage({ notify: 'hide' });
+		}
 	}
 }
 
 const Libs = {
-	storageKey :'Test13',
+	storageKey :'PLUGIN_ComponentsFlyoutMenu',
 	libs : {},
 	components : [],
 	isTeamLibrary : false,
@@ -115,7 +120,7 @@ const Libs = {
 
 	async loadStoredTeamLibraries() {
 		const storage = await figma.clientStorage.getAsync(this.storageKey);
-		console.log(storage)
+		// console.log(storage)
 		figma.ui.postMessage({'libs':storage});
 	},
 	
@@ -129,7 +134,7 @@ const Libs = {
 	// only team libraries can be added
 	async storeTeamLibrary(lib) {
 		if (this.isTeamLibrary === true) {
-			console.log('This is a team library.')
+			// console.log('This is a team library.')
 			this.addLib(lib);
 		} else {
 			figma.notify('This is not a team library.')
@@ -179,7 +184,7 @@ figma.ui.onmessage = msg => {
 		if (typeof msg.component.key === 'undefined') {
 			insertComponentById(msg.component.id);
 		} else {
-			insertTeamComponent(msg.component.key)
+			insertTeamComponent(msg.component.key, msg.component.id)
 		}
 	}
 	if (msg.type === 'add') {

@@ -3,25 +3,27 @@ import { createEventDispatcher } from 'svelte';
 const dispatch = createEventDispatcher();
 
 export let dragging;
-// function addEvent(obj, evt, fn) {
-//     if (obj.addEventListener) {
-//         obj.addEventListener(evt, fn, false);
-//     }
-//     else if (obj.attachEvent) {
-//         obj.attachEvent("on" + evt, fn);
-//     }
-// }
+function addEvent(obj, evt, fn) {
+    if (obj.addEventListener) {
+        obj.addEventListener(evt, fn, false);
+    }
+    else if (obj.attachEvent) {
+        obj.attachEvent("on" + evt, fn);
+    }
+}
 
-// addEvent(document, "mouseout", function(e) {
-//     e = e ? e : window.event;
-//     var from = e.relatedTarget || e.toElement;
-//     if (!from || from.nodeName == "HTML") {
-//         // stop your drag event here
-// 		// for now we can just use an alert
-// 		dragging = !dragging;
-//         // alert("left window");
-//     }
-// });
+addEvent(document, "mouseout", function(e) {
+    e = e ? e : window.event;
+    var from = e.relatedTarget || e.toElement;
+    if (!from || from.nodeName == "HTML") {
+        dragging = false;
+        // stop your drag event here
+		// for now we can just use an alert
+		// dragging = !dragging;
+        // alert("left window");
+        // console.log(e)
+    }
+});
 
 
 
@@ -40,7 +42,7 @@ function drag(event) {
     });
 
     if (dragging === true) {
-        console.log('DRAGGING IS NOW ACTIVATED')
+        // console.log('DRAGGING IS NOW ACTIVATED')
         
     } else {
         const size = {width: x, height: y}
@@ -55,7 +57,7 @@ function drag(event) {
 function move(event) {
     if (dragging === true) {
 
-        console.log(event.clientX)
+        // console.log(event.clientX)
 
         x = event.clientX + inc;
         y = event.clientY + inc;
