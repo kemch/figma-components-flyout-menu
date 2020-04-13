@@ -81,7 +81,7 @@
 :global(.menu > .menu__item:hover > .menu) {
     visibility: visible;
     opacity: 1;
-    z-index: 1;
+    z-index: 5;
     pointer-events: auto;
 }
 </style>
