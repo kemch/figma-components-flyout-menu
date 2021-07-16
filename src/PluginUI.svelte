@@ -81,7 +81,7 @@
 		}		
 	}
 
-	function splitPath(obj, ckeyPath, value, key) {
+	function splitPath(obj, ckeyPath, value, key, type) {
 		for (let i = 0; i < ckeyPath.length; i++) {
 			let ckey = ckeyPath[i].trim(); // name
 
@@ -89,10 +89,12 @@
 				obj[ckey] = {};
 				obj[ckey].id = value;
 				obj[ckey].key = key;
+				obj[ckey].type = type;
 			}
 			if (typeof obj.id === 'undefined') {
 				obj.id = value;
 				obj.key = key;
+				obj.type = type;
 			}
 			obj = obj[ckey];
 		}
@@ -119,9 +121,9 @@
 			.map(([name, component]) => {
 				if (component && typeof component === 'object') {
 					if (Object.keys(component).length > 2) {
-						return Object.assign({ name }, { key: component.key, id: component.id, components: transform(component) })
+						return Object.assign({ name }, { key: component.key, id: component.id, type: component.type, components: transform(component) })
 					} else {
-						return Object.assign({ name }, { key: component.key, id: component.id })
+						return Object.assign({ name }, { key: component.key, id: component.id, type: component.type })
 					}      
 				} 
 			}
@@ -132,7 +134,7 @@
 		let map = {};
 		for (let i = 0; i < data.length; i++) {
 			let split = data[i].name.split('/');
-			splitPath(map, split, data[i].id, data[i].key);
+			splitPath(map, split, data[i].id, data[i].key, data[i].type);
 		}
 		let components = transform(map);
 		components[0].source = key; // eh
@@ -287,6 +289,9 @@ Note: This does not "copy" the team library, it stores a reference to it so all 
 {/if}
 
 <style>
+:global(button) {
+	background-color:  transparent;
+}
 :global(body) {
 	/* font-family: "Inter", sans-serif; */
 	font-size: 11px;

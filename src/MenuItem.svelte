@@ -6,17 +6,18 @@
     export let name;
     export let id;
     export let key;
+    export let type;
     export let subIndicator;
     export let scope;
 
     let visible = false;
-    
+    console.log(type)
 
     function addComponent(id, key) {
         if (scope === 'LOCAL') {
-            parent.postMessage({ pluginMessage: { type: 'create-component-local', component: id } }, '*');        
+            parent.postMessage({ pluginMessage: { type: 'create-component-local', nodeType: type, component: id } }, '*');        
         } else if (scope ==='TEAM') {
-            parent.postMessage({ pluginMessage: { type: 'create-component-team', component: id } }, '*');        
+            parent.postMessage({ pluginMessage: { type: 'create-component-team', nodeType: type, component: id } }, '*');        
 
         }
     }
@@ -34,7 +35,7 @@
 {#if visible}
 <div class="tooltip">{name}</div>
 {/if}
-<div class="menu__item__content" data-key={key} on:mouseover={tooltip} on:mouseout={tooltip} on:click={addComponent({id, key})}>{name} {#if subIndicator} <span class="menu__indicator"></span>{/if}</div>
+<div class="menu__item__content" data-type={type} data-key={key} on:mouseover={tooltip} on:mouseout={tooltip} on:click={addComponent({id, key})}>{name} {#if subIndicator} <span class="menu__indicator"></span>{/if}</div>
 
 
 

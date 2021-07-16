@@ -13,8 +13,15 @@ function compare(a, b) {
 }
 
 function insertComponentById(id:string) {
-	
-	const instance = (figma.getNodeById(id) as any).createInstance();
+	const node = figma.getNodeById(id);
+	let instance;
+
+	if (node.type === "COMPONENT_SET") {
+		instance = node.defaultVariant.createInstance();
+	} else if (node.type === "COMPONENT") {
+		instance = node.createInstance();
+	}
+	// const instance = (figma.getNodeById(id) as any).createInstance();
 	const frames = figma.currentPage.children
 
 	const centerX = figma.viewport.center.x;
@@ -65,6 +72,18 @@ const insertTeamComponent = async (key, id) => {
 	}
 }
 
+const insertTeamComponentSet = async (key, id) => {
+	figma.ui.postMessage({ notify: 'show' });
+	
+	try {
+		const c = await figma.importComponentSetByKeyAsync(key);
+		insertComponentById(c.id);
+	} catch(e) {
+		figma.notify('Unable to import component. Make sure this team library is enabled in Assets > Team Library.')
+		figma.ui.postMessage({ notify: 'hide' });
+	}
+}
+
 const Libs = {
 	storageKey :'PLUGIN_ComponentsFlyoutMenu',
 	libs : {},
@@ -77,11 +96,13 @@ const Libs = {
 		this.components = [];
 		for (let index = 0; index < figma.root.children.length; index++) {
 			const page = figma.root.children[index];
-			const components = page.findAll(node => node.type === "COMPONENT");
+			const components = page.findAll(node => node.type === "COMPONENT_SET" || (node.type === "COMPONENT" && node.parent.type !== "COMPONENT_SET"));
+			// const components = page.findAll(node => node.type === "COMPONENT" );
+
 			const source = figma.root.name; // guess we'll just throw this on the component for later
 			for (let index = 0; index < components.length; index++) {
 				const component = components[index];
-				let row: { key?: string, name?: string, id?: string, source?: string} = {};
+				let row: { key?: string, name?: string, id?: string, source?: string, type?: string} = {};
 				if (component.parent.type === "FRAME") {
 					let frame = component.parent.name;;
 					row.name = frame + '/' + component.name;
@@ -90,6 +111,7 @@ const Libs = {
 				}
 				row.id = component.id;
 				row.source = source;
+				row.type = component.type;
 
 				// key is an empty string on team components
 				if (component.key !== '') {
@@ -99,6 +121,7 @@ const Libs = {
 				this.components.push(row);
 			}
 			this.components.sort(compare);
+			// console.log(this.components)
 		}
 		if (this.isTeamLibrary) {
 			// check for updates
@@ -179,7 +202,12 @@ figma.ui.onmessage = msg => {
 		if (typeof msg.component.key === 'undefined') {
 			insertComponentById(msg.component.id);
 		} else {
-			insertTeamComponent(msg.component.key, msg.component.id)
+			if (msg.nodeType === "COMPONENT_SET") {
+				insertTeamComponentSet(msg.component.key, msg.component.id)
+			}
+			else if (msg.nodeType === "COMPONENT") {
+				insertTeamComponent(msg.component.key, msg.component.id)
+			}
 		}
 	}
 

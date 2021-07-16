@@ -29,8 +29,7 @@ addEvent(document, "mouseout", function(e) {
 
 let x = 360;
 let y = 400;
-let inc = 20;
-
+let inc = 50;
 $: screen = dragging === true;
 
 function drag(event) {
